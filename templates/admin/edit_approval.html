@@ -1,0 +1,598 @@
+{% extends "common/base.html" %}
+
+{% block title %}Student Edit Requests - KM Campus{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-admin: #1e3c72;
+        --secondary-admin: #2a5298;
+        --bg-color: #f4f7fa;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+    }
+
+    body {
+        background: var(--bg-color);
+        padding: 20px;
+        color: var(--text-main);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .container {
+        max-width: 1080px;
+        margin: auto;
+    }
+
+    .header-bar {
+        background: var(--card-bg);
+        padding: 20px 25px;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        border: 1px solid #e2e8f0;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .header-bar h2 {
+        margin: 0;
+        color: var(--primary-admin);
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-nav {
+        background: #e2e8f0;
+        color: #334155;
+        padding: 8px 14px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .btn-nav:hover {
+        background: #cbd5e1;
+    }
+
+    .flash-banner {
+        background: #ecfdf5;
+        border: 1px solid #6ee7b7;
+        color: #065f46;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .editor-panel {
+        display: none;
+        background: var(--card-bg);
+        border-radius: 14px;
+        border: 2px solid var(--primary-admin);
+        box-shadow: 0 8px 28px rgba(30, 60, 114, 0.14);
+        padding: 22px 24px;
+        margin-bottom: 22px;
+    }
+
+    .editor-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 10px;
+        margin-bottom: 16px;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .editor-header h3 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--primary-admin);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+        gap: 14px;
+        align-items: end;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .form-control {
+        box-sizing: border-box;
+        width: 100%;
+        padding: 9px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 13px;
+        background: #ffffff;
+        color: var(--text-main);
+    }
+
+    .btn-save-edit {
+        background: linear-gradient(135deg, #2563eb, #1e3c72);
+        color: #ffffff;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .btn-close-panel {
+        background: #fff1f2;
+        color: #be123c;
+        border: 1px solid #fda4af;
+        padding: 5px 11px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .request-card {
+        background: var(--card-bg);
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+
+    .request-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 14px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .student-meta {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .avatar-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #e2e8f0;
+        color: #334155;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 18px;
+        border: 2px solid #cbd5e1;
+    }
+
+    .badge-pending {
+        background: #fef3c7;
+        color: #92400e;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .top-card-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-edit-student {
+        background: #eff6ff;
+        color: var(--primary-admin);
+        border: 1px solid #93c5fd;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-edit-student:hover {
+        background: #dbeafe;
+    }
+
+    .btn-dossier {
+        background: #f8fafc;
+        color: var(--primary-admin);
+        border: 1px solid #bfdbfe;
+        padding: 6px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .btn-dossier:hover {
+        background: #eff6ff;
+    }
+
+    .diff-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        margin-bottom: 18px;
+    }
+
+    .diff-table th {
+        background: #f8fafc;
+        color: var(--text-muted);
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 11px;
+        text-transform: uppercase;
+    }
+
+    .diff-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .old-val {
+        color: #64748b;
+        text-decoration: line-through;
+    }
+
+    .new-val {
+        color: #065f46;
+        background: #ecfdf5;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 700;
+        display: inline-block;
+    }
+
+    .doc-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px;
+        text-align: center;
+        margin-bottom: 18px;
+    }
+
+    .doc-box label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .doc-box img {
+        max-width: 100%;
+        max-height: 240px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        object-fit: contain;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .btn-action {
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-approve {
+        background: #10b981;
+        color: #ffffff;
+    }
+
+    .btn-reject {
+        background: #ef4444;
+        color: #ffffff;
+    }
+
+    .empty-state {
+        background: var(--card-bg);
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        padding: 40px 20px;
+        text-align: center;
+        color: var(--text-muted);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <div class="header-bar">
+        <div>
+            <h2>✏️ Student Profile Edit Approvals</h2>
+            <small style="color: var(--text-muted);">Compare requested updates or edit student details directly before approving</small>
+        </div>
+        <div class="header-actions">
+            <a href="/admin/dashboard" class="btn-nav">&larr; Dashboard</a>
+            <a href="/admin/students" class="btn-nav">Active & Deactive Students</a>
+            <a href="/admin/registrations" class="btn-nav">New Registrations</a>
+        </div>
+    </div>
+
+    {% if flash_msg %}
+    <div id="editReqFlash" class="flash-banner">
+        <span>✓ {{ flash_msg }}</span>
+        <button type="button" class="btn-close-panel" onclick="document.getElementById('editReqFlash').style.display='none'">✕</button>
+    </div>
+    {% endif %}
+
+    <!-- Direct Admin Edit Panel (Matches Active & Deactive Students Editor) -->
+    <div id="adminEditPanel" class="editor-panel">
+        <div class="editor-header">
+            <h3 id="adminEditPanelTitle">✏️ Edit Student Details</h3>
+            <button type="button" class="btn-close-panel" onclick="closeAdminEditPanel()">✕ Close</button>
+        </div>
+
+        <form method="POST" action="/admin/edit-requests" class="form-grid">
+            <input type="hidden" name="action" value="update_student">
+            <input type="hidden" id="req_edit_student_id" name="student_id" required>
+
+            <div class="form-group">
+                <label for="req_edit_name">Student Name *</label>
+                <input type="text" id="req_edit_name" name="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="req_edit_father">Father's Name</label>
+                <input type="text" id="req_edit_father" name="father_name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="req_edit_class">Class</label>
+                <input type="text" id="req_edit_class" name="school_class" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="req_edit_batch">Batch</label>
+                <select id="req_edit_batch" name="batch" class="form-control">
+                    {% for b in batch_options %}
+                    <option value="{{ b }}">{{ b }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="req_edit_gender">Gender</label>
+                <select id="req_edit_gender" name="gender" class="form-control">
+                    <option value="">Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="req_edit_dob">Date of Birth</label>
+                <input type="date" id="req_edit_dob" name="dob" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="req_edit_phone">Phone (Male Only on List)</label>
+                <input type="text" id="req_edit_phone" name="phone" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="req_edit_village">Village / Address</label>
+                <input type="text" id="req_edit_village" name="village" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="req_edit_status">Roster Status</label>
+                <select id="req_edit_status" name="status" class="form-control" onchange="toggleReqLeavingReason(this.value)">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Deactivated (Left Institution)</option>
+                </select>
+            </div>
+            <div class="form-group" id="reqLeavingReasonGroup" style="display: none;">
+                <label for="req_edit_reason">Reason for Leaving</label>
+                <input type="text" id="req_edit_reason" name="leaving_reason" class="form-control" placeholder="e.g., Shifted / Completed course">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn-save-edit">💾 Save Changes</button>
+            </div>
+        </form>
+    </div>
+
+    {% if edit_requests %}
+        {% for req in edit_requests %}
+        <div class="request-card">
+            <div class="request-top">
+                <div class="student-meta">
+                    {% if req.current_photo %}
+                        <img src="{{ url_for('static', filename='uploads/' + req.current_photo) }}" alt="{{ req.current_name }}" class="avatar-circle">
+                    {% else %}
+                        <div class="avatar-circle">{{ req.current_name[0] | upper }}</div>
+                    {% endif %}
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <strong style="font-size: 16px;">{{ req.current_name }}</strong>
+                            <span class="badge-pending">Pending Edit</span>
+                        </div>
+                        <small style="color: var(--text-muted);">
+                            @{{ req.username }} • Class: {{ req.school_class or 'N/A' }} • Requested: {{ req.requested_at or 'Recently' }}
+                        </small>
+                    </div>
+                </div>
+
+                <div class="top-card-actions">
+                    <button type="button" class="btn-edit-student"
+                            onclick='openAdminEditPanel({{ req.student_id }}, {{ req.current_name | tojson }}, {{ req.current_father_name | tojson }}, {{ req.school_class | tojson }}, {{ req.current_batch | tojson }}, {{ req.current_gender | tojson }}, {{ req.current_dob | tojson }}, {{ req.current_phone | tojson }}, {{ req.current_village | tojson }}, {{ req.current_status | tojson }}, {{ req.current_leaving_reason | tojson }})'>
+                        ✏️ Edit Details
+                    </button>
+                    <a href="/admin-student-profile/{{ req.student_id }}" target="_blank" class="btn-dossier">
+                        👁️ Open Full Dossier
+                    </a>
+                </div>
+            </div>
+
+            <!-- Old vs New Comparison Table -->
+            <table class="diff-table">
+                <thead>
+                    <tr>
+                        <th style="width: 24%;">Field</th>
+                        <th style="width: 38%;">Current Saved Value</th>
+                        <th style="width: 38%;">Requested New Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set fields = [
+                        ('Full Name', req.current_name, req.name),
+                        ('Father\'s Name', req.current_father_name, req.father_name),
+                        ('Date of Birth', req.current_dob, req.dob),
+                        ('Gender', req.current_gender, req.gender),
+                        ('Aadhaar Number', req.current_aadhaar, req.aadhaar)
+                    ] %}
+
+                    {% for label, old_v, new_v in fields %}
+                        {% if new_v and (new_v | string) != (old_v | string) %}
+                        <tr>
+                            <td><strong>{{ label }}</strong></td>
+                            <td><span class="old-val">{{ old_v or 'N/A' }}</span></td>
+                            <td>
+                                {% if label == 'Aadhaar Number' %}
+                                    <span class="new-val">Masked (View in Full Dossier)</span>
+                                {% else %}
+                                    <span class="new-val">{{ new_v }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Supporting Document Scan Preview -->
+            {% if req.proof_doc %}
+            <div class="doc-box">
+                <label>Uploaded Supporting Proof Document</label>
+                <a href="{{ url_for('static', filename='uploads/' + req.proof_doc) }}" target="_blank"
+                   style="font-size: 12px; font-weight: 600; color: var(--primary-admin); display: inline-block; margin-bottom: 8px;">
+                    🔍 Open Full-Screen Proof Document
+                </a><br>
+                <img src="{{ url_for('static', filename='uploads/' + req.proof_doc) }}" alt="Proof Document">
+            </div>
+            {% endif %}
+
+            <!-- Approve / Reject Buttons -->
+            <div class="card-footer">
+                <form action="/admin/edit-requests/{{ req.id }}/reject" method="POST" style="margin: 0;"
+                      onsubmit="return confirm('Reject this edit request from {{ req.current_name }}?');">
+                    <button type="submit" class="btn-action btn-reject">✕ Reject Edit</button>
+                </form>
+
+                <form action="/admin/edit-requests/{{ req.id }}/approve" method="POST" style="margin: 0;"
+                      onsubmit="return confirm('Approve and apply these profile changes for {{ req.current_name }}?');">
+                    <button type="submit" class="btn-action btn-approve">✓ Approve & Apply</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <h3 style="margin-top: 0; color: var(--text-main);">No Pending Edit Requests</h3>
+            <p style="margin: 0; font-size: 14px;">All student profile update requests have been reviewed.</p>
+        </div>
+    {% endif %}
+
+</div>
+
+<script>
+    function toggleReqLeavingReason(statusVal) {
+        const grp = document.getElementById('reqLeavingReasonGroup');
+        if (grp) grp.style.display = (statusVal === 'Inactive') ? 'block' : 'none';
+    }
+
+    function openAdminEditPanel(studentId, name, fatherName, schoolClass, batch, gender, dob, phone, village, status, leavingReason) {
+        const panel = document.getElementById('adminEditPanel');
+        document.getElementById('adminEditPanelTitle').textContent = '✏️ Edit Student Details — ' + (name || '');
+        document.getElementById('req_edit_student_id').value = studentId;
+        document.getElementById('req_edit_name').value = name || '';
+        document.getElementById('req_edit_father').value = fatherName || '';
+        document.getElementById('req_edit_class').value = schoolClass || '';
+
+        const batchSel = document.getElementById('req_edit_batch');
+        if (batchSel && batch) {
+            const exists = Array.from(batchSel.options).some(opt => opt.value === batch);
+            if (!exists) {
+                const opt = document.createElement('option');
+                opt.value = batch;
+                opt.textContent = batch;
+                batchSel.appendChild(opt);
+            }
+            batchSel.value = batch;
+        }
+
+        const genderSel = document.getElementById('req_edit_gender');
+        if (genderSel) {
+            const gNorm = (gender || '').trim().toLowerCase();
+            genderSel.value = gNorm === 'male' ? 'Male' : (gNorm === 'female' ? 'Female' : '');
+        }
+
+        document.getElementById('req_edit_dob').value = dob || '';
+        document.getElementById('req_edit_phone').value = phone || '';
+        document.getElementById('req_edit_village').value = village || '';
+
+        const stSel = document.getElementById('req_edit_status');
+        if (stSel) {
+            stSel.value = (status === 'Inactive') ? 'Inactive' : 'Active';
+            toggleReqLeavingReason(stSel.value);
+        }
+        document.getElementById('req_edit_reason').value = leavingReason || '';
+
+        if (panel) {
+            panel.style.display = 'block';
+            panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function closeAdminEditPanel() {
+        const panel = document.getElementById('adminEditPanel');
+        if (panel) panel.style.display = 'none';
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 1: Essential Details &amp; Verification - KM Campus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .steps { display: flex; justify-content: center; margin-bottom: 20px; font-size: 12px; font-weight: bold; color: var(--text-muted); gap: 8px; align-items: center; }
+        .steps span { padding: 6px 12px; border-radius: 6px; background: #e2e8f0; }
+        .steps span.active { background: var(--primary-color); color: white; box-shadow: 0 3px 8px rgba(37, 117, 252, 0.3); }
+
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 540px) { .row { grid-template-columns: 1fr; } }
+
+        .otp-section { background: #f8fafc; border: 1.5px dashed #cbd5e1; padding: 18px; border-radius: 12px; margin: 16px 0; }
+        
+        .email-input { width: 100%; padding: 14px 16px; font-size: 16px; border: 1.5px solid #cbd5e1; border-radius: 8px; background: #fff; color: var(--text-main); box-sizing: border-box; margin-bottom: 10px; }
+        .email-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.15); }
+
+        .btn-compact { padding: 8px 16px; background: var(--primary-color); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; white-space: nowrap; transition: background 0.2s, opacity 0.2s; height: 38px; display: inline-flex; align-items: baseline; justify-content: center; gap: 5px; }
+        .btn-compact:hover { opacity: 0.92; }
+        .btn-compact:disabled { background: #475569; cursor: not-allowed; opacity: 0.95; }
+
+        /* Attractive "Resend OTP" primary text + subtle, understated timer */
+        .resend-label { font-size: 14px; font-weight: 700; letter-spacing: 0.2px; color: #ffffff; }
+        .resend-timer { font-size: 11.5px; font-weight: 500; color: #cbd5e1; font-variant-numeric: tabular-nums; }
+
+        .otp-input-group { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+        .otp-input { width: 130px; padding: 8px 10px; font-size: 15px; font-weight: bold; letter-spacing: 2px; text-align: center; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #fff; height: 38px; box-sizing: border-box; transition: border-color 0.2s; }
+        .otp-input:focus { outline: none; border-color: var(--primary-color); }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+            100% { transform: translateX(0); }
+        }
+        .error-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+        .otp-input.error-border {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+        }
+        .btn-compact.error-btn {
+            background-color: #ef4444 !important;
+        }
+
+        .suggestion-box { margin-top: 6px; display: none; }
+        .suggestion-label { font-size: 11px; color: #475569; font-weight: 600; display: block; margin-bottom: 4px; }
+        .chip-container { display: flex; flex-wrap: wrap; gap: 6px; }
+        .id-chip { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 3px 10px; border-radius: 14px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
+        .id-chip:hover { background: var(--primary-color); color: #ffffff; border-color: var(--primary-color); }
+
+        /* Clean Show Password Checkbox Styling */
+        .show-pass-row {
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #475569;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .show-pass-row input {
+            width: auto;
+            cursor: pointer;
+        }
+
+        .password-checklist { font-size: 11px; margin-top: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0; }
+        .req-item { color: #ef4444; transition: color 0.2s ease; }
+        .req-item.valid { color: #10b981; }
+
+        .alert-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; padding: 11px 14px; border-radius: 8px; margin-bottom: 16px; font-weight: 600; text-align: center; font-size: 13px; }
+        .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-weight: 600; text-align: center; font-size: 12px; }
+        
+        #submitBtn:disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+<div class="card" style="max-width: 620px;">
+    <h2>🎓 KM Campus Registration</h2>
+    <p style="text-align: center; color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+        Step 1: Essential Details, Email OTP &amp; Login Credentials
+    </p>
+
+    <div class="steps">
+        <span class="active">1. Info &amp; Verification</span>
+        <span>&rarr;</span>
+        <span>2. Address &amp; Documents</span>
+    </div>
+
+    {% if error %}
+        <div class="alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form action="/register" method="POST" onsubmit="return validateForm(event)">
+        
+        <div class="row">
+            <div class="form-group">
+                <label>Student Full Name *</label>
+                <input type="text" id="nameInput" name="name" value="{{ form_data.name if form_data else '' }}" placeholder="Enter student's full name" oninput="generateLoginSuggestions()" required>
+            </div>
+            <div class="form-group">
+                <label>Father's Name *</label>
+                <input type="text" name="father_name" value="{{ form_data.father_name if form_data else '' }}" placeholder="Enter father's name" required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>Date of Birth *</label>
+                <input type="date" id="dobInput" name="dob" min="1985-01-01" value="{{ form_data.dob if form_data else '' }}" onchange="generateLoginSuggestions()" required>
+            </div>
+            <div class="form-group">
+                <label>Primary Contact No. (WhatsApp) *</label>
+                <input type="tel" id="phoneInput" name="phone" maxlength="10" value="{{ form_data.phone if form_data else '' }}" placeholder="10-digit mobile number" oninput="generateLoginSuggestions()" required>
+            </div>
+        </div>
+
+        <!-- EMAIL & INLINE OTP VERIFICATION BLOCK -->
+        <div class="otp-section">
+            <label style="margin-top: 0; display: block; margin-bottom: 6px; font-weight: bold;">Email Address (For Verification) *</label>
+            <input type="email" id="emailInput" name="email" class="email-input" value="{{ form_data.email if form_data else '' }}" placeholder="student@example.com" oninput="handleEmailChange()" required>
+            
+            <div id="sendBtnRow" style="display: flex; justify-content: flex-start; align-items: center;">
+                <button type="button" id="sendOtpBtn" class="btn-compact" onclick="triggerSendOtp()">Send OTP</button>
+            </div>
+
+            <div id="otpBlock" style="display: none; margin-top: 14px;">
+                <label style="color: var(--primary-color); font-weight: bold; font-size: 12px; display: block; margin-bottom: 4px;">Enter 6-Digit OTP *</label>
+                <div class="otp-input-group" id="otpInputContainer">
+                    <input type="text" id="otpInput" class="otp-input" maxlength="6" inputmode="numeric" placeholder="------" oninput="clearOtpErrorState()">
+                    <button type="button" id="verifyOtpBtn" class="btn-compact" onclick="verifyOtpAjax()">Verify</button>
+                </div>
+            </div>
+            <div id="otpStatusBox" style="margin-top: 8px;"></div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>Create Login ID (Username) *</label>
+                <input type="text" id="usernameInput" name="username" value="{{ form_data.username if form_data else '' }}" oninput="enforceLowercase(this)" placeholder="e.g. adarsh2005" required>
+                <small style="color: var(--text-muted); font-size: 11px;">Lowercase letters &amp; numbers only.</small>
+
+                <div id="suggestionBox" class="suggestion-box">
+                    <span class="suggestion-label">💡 Suggested Unique IDs (Click to use):</span>
+                    <div id="chipContainer" class="chip-container"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Preferred Batch</label>
+                <select name="batch">
+                    <option value="Morning Batch" {% if form_data and form_data.batch == 'Morning Batch' %}selected{% endif %}>Morning Batch</option>
+                    <option value="Evening Batch" {% if form_data and form_data.batch == 'Evening Batch' %}selected{% endif %}>Evening Batch</option>
+                    <option value="Special Batch" {% if form_data and form_data.batch == 'Special Batch' %}selected{% endif %}>Special Batch</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>Password *</label>
+                <input type="password" id="password" name="password" placeholder="Create password" onkeyup="checkPasswordCriteria()" required>
+                
+                <div class="password-checklist" style="margin-top: 8px;">
+                    <div id="req-len" class="req-item">• At least 6 chars</div>
+                    <div id="req-upper" class="req-item">• Uppercase (A-Z)</div>
+                    <div id="req-lower" class="req-item">• Lowercase (a-z)</div>
+                    <div id="req-num" class="req-item">• Number (0-9)</div>
+                    <div id="req-sym" class="req-item" style="grid-column: span 2;">• Symbol (!@#$%^&*)</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Retype Password *</label>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Retype password" onkeyup="checkMatch()" required>
+                
+                <!-- Single Show Password checkbox controlling both fields -->
+                <label class="show-pass-row" style="margin-top: 10px;">
+                    <input type="checkbox" onclick="toggleBothPasswords(this)"> Show Password
+                </label>
+
+                <div id="matchStatus" class="match-status" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <button type="submit" id="submitBtn" disabled style="margin-top: 18px; width: 100%;">Verify Email First to Proceed ➔</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <p style="font-size: 13px; color: var(--text-muted);">
+            Already registered? <a href="{{ url_for('index') }}">Login to your portal</a>
+        </p>
+    </div>
+</div>
+
+<script>
+    let countdownInterval;
+    let isEmailVerified = false;
+    let lastSentEmail = "";
+    let otpSentState = false;
+
+    function toggleBothPasswords(checkbox) {
+        const passInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirm_password');
+        const targetType = checkbox.checked ? "text" : "password";
+        passInput.type = targetType;
+        confirmInput.type = targetType;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('dobInput').setAttribute('max', today);
+    });
+
+    function enforceLowercase(input) {
+        input.value = input.value.toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    function handleEmailChange() {
+        if (isEmailVerified) return;
+
+        const currentEmail = document.getElementById('emailInput').value.trim();
+        const sendBtn = document.getElementById('sendOtpBtn');
+
+        if (otpSentState && currentEmail !== lastSentEmail) {
+            sendBtn.innerHTML = "Send OTP";
+            sendBtn.disabled = false;
+            otpSentState = false;
+            clearInterval(countdownInterval);
+        }
+    }
+
+    function generateLoginSuggestions() {
+        const rawName = document.getElementById('nameInput').value.trim().toLowerCase();
+        const dob = document.getElementById('dobInput').value;
+        const phone = document.getElementById('phoneInput').value.replace(/\D/g, '');
+
+        const firstName = rawName.split(/\s+/)[0].replace(/[^a-z]/g, '');
+        const suggestionBox = document.getElementById('suggestionBox');
+        const chipContainer = document.getElementById('chipContainer');
+
+        if (firstName.length < 2) {
+            suggestionBox.style.display = 'none';
+            return;
+        }
+
+        const suggestions = [];
+        const birthYear = dob ? dob.split('-')[0] : '';
+        const birthDayMonth = dob ? (dob.split('-')[2] + dob.split('-')[1]) : '';
+        const last4Phone = phone.length >= 4 ? phone.slice(-4) : '';
+
+        if (birthYear) suggestions.push(firstName + birthYear);
+        if (last4Phone) suggestions.push(firstName + last4Phone);
+        if (birthDayMonth) suggestions.push(firstName + birthDayMonth);
+        if (suggestions.length === 0) {
+            suggestions.push(firstName + "032002");
+        }
+
+        if (suggestions.length > 0) {
+            document.getElementById('usernameInput').placeholder = `e.g. ${suggestions[0]}`;
+        }
+
+        chipContainer.innerHTML = '';
+        suggestions.forEach(id => {
+            const chip = document.createElement('span');
+            chip.className = 'id-chip';
+            chip.textContent = id; 
+            chip.onclick = () => { 
+                document.getElementById('usernameInput').value = id; 
+            };
+            chipContainer.appendChild(chip);
+        });
+
+        suggestionBox.style.display = 'block';
+    }
+
+    function renderButtonTimer(secondsRemaining) {
+        const sendBtn = document.getElementById('sendOtpBtn');
+        const minutes = String(Math.floor(secondsRemaining / 60)).padStart(2, '0');
+        const seconds = String(secondsRemaining % 60).padStart(2, '0');
+        sendBtn.innerHTML = `<span class="resend-label">Resend OTP</span> <span class="resend-timer">in ${minutes}:${seconds}</span>`;
+    }
+
+    function startTimer(duration) {
+        let timer = duration;
+        const sendBtn = document.getElementById('sendOtpBtn');
+        sendBtn.disabled = true;
+        renderButtonTimer(timer);
+
+        clearInterval(countdownInterval);
+        countdownInterval = setInterval(() => {
+            if (isEmailVerified) {
+                clearInterval(countdownInterval);
+                return;
+            }
+
+            timer--;
+
+            if (timer >= 0) {
+                renderButtonTimer(timer);
+            } else {
+                clearInterval(countdownInterval);
+                if (!isEmailVerified) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = `<span class="resend-label">Resend OTP</span>`;
+                }
+            }
+        }, 1000);
+    }
+
+    function triggerSendOtp() {
+        if (isEmailVerified) return;
+
+        const emailField = document.getElementById('emailInput').value.trim();
+        const statusBox = document.getElementById('otpStatusBox');
+
+        if (!emailField || !emailField.includes('@')) {
+            alert("Please enter a valid email address first.");
+            return;
+        }
+
+        lastSentEmail = emailField;
+        otpSentState = true;
+
+        fetch('/send-reg-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'email=' + encodeURIComponent(emailField)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById('otpBlock').style.display = 'block';
+                statusBox.innerHTML = `<div class="alert-success">✓ Verification OTP sent successfully to <b>${emailField}</b>.</div>`;
+                startTimer(90);
+            } else {
+                statusBox.innerHTML = `<div class="alert-error">⚠️ ${data.message}</div>`;
+                otpSentState = false;
+            }
+        })
+        .catch(() => {
+            document.getElementById('otpBlock').style.display = 'block';
+            statusBox.innerHTML = `<div class="alert-success">✓ Verification OTP sent successfully to <b>${emailField}</b>.</div>`;
+            startTimer(90);
+        });
+    }
+
+    function clearOtpErrorState() {
+        const otpInput = document.getElementById('otpInput');
+        const verifyBtn = document.getElementById('verifyOtpBtn');
+        otpInput.classList.remove('error-border');
+        verifyBtn.classList.remove('error-btn');
+    }
+
+    function verifyOtpAjax() {
+        const otpVal = document.getElementById('otpInput').value.trim();
+        const statusBox = document.getElementById('otpStatusBox');
+        const otpInput = document.getElementById('otpInput');
+        const verifyBtn = document.getElementById('verifyOtpBtn');
+
+        if (otpVal.length !== 6) {
+            alert("Please enter a valid 6-digit OTP code.");
+            return;
+        }
+
+        fetch('/verify-reg-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'otp=' + encodeURIComponent(otpVal)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'verified') {
+                isEmailVerified = true;
+                clearInterval(countdownInterval);
+
+                statusBox.innerHTML = `<div class="alert-success">✓ Email Verified Successfully! You can now proceed.</div>`;
+                
+                otpInput.disabled = true;
+                verifyBtn.disabled = true;
+                document.getElementById('sendOtpBtn').disabled = true;
+                document.getElementById('sendBtnRow').style.display = 'none';
+                document.getElementById('emailInput').readOnly = true;
+
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = false;
+                submitBtn.style.background = "linear-gradient(135deg, var(--primary-color) 0%, #1e3c72 100%)";
+                submitBtn.textContent = "Next: Address & Documents ➔";
+            } else {
+                statusBox.innerHTML = `<div class="alert-error">⚠️ ${data.message}</div>`;
+                otpInput.value = "";
+                otpInput.classList.add('error-border', 'error-shake');
+                verifyBtn.classList.add('error-btn', 'error-shake');
+                
+                setTimeout(() => {
+                    otpInput.classList.remove('error-shake');
+                    verifyBtn.classList.remove('error-shake');
+                }, 400);
+            }
+        });
+    }
+
+    function checkPasswordCriteria() {
+        const pass = document.getElementById('password').value;
+
+        const hasLen = pass.length >= 6;
+        const hasUpper = /[A-Z]/.test(pass);
+        const hasLower = /[a-z]/.test(pass);
+        const hasNum = /[0-9]/.test(pass);
+        const hasSym = /[^A-Za-z0-9]/.test(pass);
+
+        document.getElementById('req-len').className = "req-item " + (hasLen ? "valid" : "");
+        document.getElementById('req-upper').className = "req-item " + (hasUpper ? "valid" : "");
+        document.getElementById('req-lower').className = "req-item " + (hasLower ? "valid" : "");
+        document.getElementById('req-num').className = "req-item " + (hasNum ? "valid" : "");
+        document.getElementById('req-sym').className = "req-item " + (hasSym ? "valid" : "");
+
+        checkMatch();
+    }
+
+    function checkMatch() {
+        const pass = document.getElementById('password').value;
+        const confirmPass = document.getElementById('confirm_password').value;
+        const status = document.getElementById('matchStatus');
+
+        if (confirmPass === "") {
+            status.innerText = "";
+        } else if (pass === confirmPass) {
+            status.style.color = "#10b981";
+            status.innerText = "Passwords match ✓";
+        } else {
+            status.style.color = "#ef4444";
+            status.innerText = "Passwords do not match ✗";
+        }
+    }
+
+    function validateForm(event) {
+        const phone = document.getElementById('phoneInput').value;
+        const username = document.getElementById('usernameInput').value;
+        const pass = document.getElementById('password').value;
+        const confirmPass = document.getElementById('confirm_password').value;
+
+        if (!isEmailVerified) {
+            alert("You must verify your email with the OTP before submitting.");
+            event.preventDefault();
+            return false;
+        }
+
+        if (phone.length !== 10 || isNaN(phone)) {
+            alert("Please enter a valid 10-digit primary mobile number.");
+            event.preventDefault();
+            return false;
+        }
+
+        if (!/^[a-z0-9]+$/.test(username)) {
+            alert("Login ID must contain only lowercase letters and numbers.");
+            event.preventDefault();
+            return false;
+        }
+
+        const hasLen = pass.length >= 6;
+        const hasUpper = /[A-Z]/.test(pass);
+        const hasLower = /[a-z]/.test(pass);
+        const hasNum = /[0-9]/.test(pass);
+        const hasSym = /[^A-Za-z0-9]/.test(pass);
+
+        if (!hasLen || !hasUpper || !hasLower || !hasNum || !hasSym) {
+            alert("Password does not meet all security requirements (length, uppercase, lowercase, number, and symbol).");
+            event.preventDefault();
+            return false;
+        }
+
+        if (pass !== confirmPass) {
+            alert("Passwords do not match!");
+            event.preventDefault();
+            return false;
+        }
+
+        return true;
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,157 @@
+{% extends "common/base.html" %}
+
+{% block title %}Pending Approvals Queue - KM Campus, Banwaripur{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-admin: #1e3c72;
+        --bg-color: #f4f7fa;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+    }
+
+    body { background: var(--bg-color); padding: 20px; color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .container { max-width: 1100px; margin: auto; }
+
+    /* Header Bar */
+    .header-bar { 
+        background: var(--card-bg); padding: 20px 25px; border-radius: 14px; 
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05); display: flex; 
+        justify-content: space-between; align-items: center; margin-bottom: 25px; 
+        border: 1px solid #e2e8f0; 
+    }
+    .header-bar h2 { margin: 0; color: var(--primary-admin); font-size: 20px; font-weight: 700; }
+    .back-btn { 
+        background: #e2e8f0; color: #334155; padding: 8px 14px; border-radius: 8px; 
+        text-decoration: none; font-size: 13px; font-weight: 600; transition: background 0.2s; 
+    }
+    .back-btn:hover { background: #cbd5e1; }
+
+    /* Table Container */
+    .table-container { 
+        background: var(--card-bg); border-radius: 14px; border: 1px solid #e2e8f0; 
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; 
+    }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+    th { background: #f8fafc; color: var(--text-muted); font-weight: 700; padding: 14px 18px; border-bottom: 1px solid #e2e8f0; }
+    td { padding: 14px 18px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #f9fbfe; }
+
+    /* Avatar & Badges */
+    .student-avatar { 
+        width: 45px; height: 45px; border-radius: 50%; object-fit: cover; 
+        border: 2px solid #cbd5e1; background: #e2e8f0; 
+    }
+    .gender-badge {
+        display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
+    }
+    .gender-m { background: #dbeafe; color: #1e40af; }
+    .gender-f { background: #fce7f3; color: #9d174d; }
+
+    /* Action Buttons */
+    .action-group { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+    .btn-sm {
+        padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px;
+        text-decoration: none; border: none; cursor: pointer; display: inline-flex;
+        align-items: center; gap: 4px; transition: opacity 0.2s;
+    }
+    .btn-sm:hover { opacity: 0.85; }
+    .btn-view { background: var(--primary-admin); color: white; }
+    .btn-approve-sm { background: #10b981; color: white; }
+    .btn-reject-xs {
+        padding: 2px 6px; font-size: 10px; font-weight: 500; border-radius: 4px;
+        background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5;
+        text-decoration: none; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-reject-xs:hover { background: #ef4444; color: white; }
+
+    .empty-state { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+    .empty-state h3 { margin-bottom: 8px; color: var(--text-main); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <!-- Header Bar -->
+    <div class="header-bar">
+        <div>
+            <h2>📋 Pending Approvals Queue</h2>
+            <small style="color: var(--text-muted);">Review student applications before granting Active status</small>
+        </div>
+        <a href="/admin/dashboard" class="back-btn">&larr; Back to Dashboard</a>
+    </div>
+
+    <!-- Table Container -->
+    <div class="table-container">
+        {% if pending_students %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Student Name</th>
+                    <th>Village</th>
+                    <th>Contact</th>
+                    <th>Gender</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in pending_students %}
+                <tr>
+                    <td>
+                        {% if student.photo %}
+                        <img src="{{ url_for('static', filename='uploads/' + student.photo) }}" alt="Photo" class="student-avatar">
+                        {% else %}
+                        <div class="student-avatar" style="display: flex; align-items: center; justify-content: center; font-weight: bold; color: #64748b;">
+                            {{ student.name[0] | upper }}
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong style="color: var(--text-main);">{{ student.name }}</strong><br>
+                        <small style="color: var(--text-muted);">@{{ student.username }}</small>
+                    </td>
+                    <td>{{ student.village or 'N/A' }}</td>
+                    <td>{{ student.phone or 'N/A' }}</td>
+                    <td>
+                        {% set g = (student.gender | upper) %}
+                        {% if g.startswith('M') %}
+                            <span class="gender-badge gender-m">M</span>
+                        {% elif g.startswith('F') %}
+                            <span class="gender-badge gender-f">F</span>
+                        {% else %}
+                            <span class="gender-badge" style="background:#e2e8f0; color:#334155;">{{ student.gender or 'N/A' }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">
+                        <div class="action-group">
+                            <!-- Separate Webpage Link -->
+                            <a href="/admin-student-profile/{{ student.id }}" class="btn-sm btn-view">
+                                👁️ View
+                            </a>
+                            <a href="/approve/{{ student.id }}" class="btn-sm btn-approve-sm" onclick="return confirm('Approve {{ student.name }}?');">
+                                ✓ Approve
+                            </a>
+                            <a href="/delete/{{ student.id }}" class="btn-reject-xs" onclick="return confirm('Reject and delete {{ student.name }}?');">
+                                Reject
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <h3>🎉 No Pending Approvals</h3>
+            <p>All student admission requests have been successfully processed.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

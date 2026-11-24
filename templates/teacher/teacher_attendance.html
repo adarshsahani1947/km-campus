@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance — KM Campus</title>
+
+    <style id="km-common-css">
+        :root {
+            --km-bg: #eef2f6;
+            --km-surface: #ffffff;
+            --km-surface-alt: #f8fafc;
+            --km-ink: #0f172a;
+            --km-muted: #64748b;
+            --km-border: #dce3ec;
+            --km-primary: #1d4ed8;
+            --km-primary-hover: #1e40af;
+            --km-primary-soft: #eff6ff;
+            --km-indigo: #4338ca;
+            --km-indigo-hover: #3730a3;
+            --km-success: #15803d;
+            --km-success-hover: #166534;
+            --km-success-soft: #dcfce7;
+            --km-danger: #dc2626;
+            --km-danger-hover: #b91c1c;
+            --km-danger-soft: #fee2e2;
+            --km-amber: #d97706;
+            --km-amber-hover: #b45309;
+            --km-amber-soft: #fef3c7;
+            --km-radius: 10px;
+            --km-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--km-bg);
+            color: var(--km-ink);
+            line-height: 1.35;
+            padding-bottom: 48px;
+        }
+
+        .km-topbar {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .km-topbar h1 { font-size: 1.08rem; font-weight: 700; }
+        .km-topbar p { font-size: 0.76rem; color: #cbd5e1; margin-top: 2px; }
+        .km-topbar-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+
+        .km-container {
+            max-width: 1040px;
+            margin: 14px auto;
+            padding: 0 12px;
+        }
+
+        .km-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 6px 11px;
+            border-radius: 7px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+        .km-btn-sm { padding: 5px 9px; font-size: 0.75rem; }
+        .km-btn-dark { background: rgba(255, 255, 255, 0.1); color: #f8fafc; border-color: rgba(255, 255, 255, 0.22); }
+        .km-btn-dark:hover { background: rgba(255, 255, 255, 0.18); }
+        .km-btn-primary { background: var(--km-primary); color: #ffffff; }
+        .km-btn-primary:hover { background: var(--km-primary-hover); }
+        .km-btn-indigo { background: var(--km-indigo); color: #ffffff; }
+        .km-btn-indigo:hover { background: var(--km-indigo-hover); }
+        .km-btn-success { background: var(--km-success); color: #ffffff; }
+        .km-btn-success:hover { background: var(--km-success-hover); }
+        .km-btn-amber { background: var(--km-amber); color: #ffffff; }
+        .km-btn-amber:hover { background: var(--km-amber-hover); }
+        .km-btn-outline { background: #ffffff; color: var(--km-ink); border-color: var(--km-border); }
+
+        .km-flash {
+            padding: 9px 13px;
+            border-radius: var(--km-radius);
+            margin-bottom: 12px;
+            font-size: 0.84rem;
+            font-weight: 600;
+            border: 1px solid;
+        }
+        .km-flash.success { background: #f0fdf4; color: var(--km-success); border-color: #bbf7d0; }
+        .km-flash.error { background: #fef2f2; color: var(--km-danger); border-color: #fecaca; }
+
+        .km-mode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .km-mode-card {
+            background: var(--km-surface);
+            border: 2px solid var(--km-border);
+            border-radius: var(--km-radius);
+            padding: 12px 14px;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            box-shadow: var(--km-shadow);
+        }
+        .km-mode-card.active {
+            border-color: var(--km-primary);
+            background: linear-gradient(180deg, #ffffff 0%, var(--km-primary-soft) 100%);
+        }
+        .km-mode-title { font-size: 0.94rem; font-weight: 700; }
+        .km-mode-sub { font-size: 0.74rem; color: var(--km-muted); margin-top: 2px; }
+        .km-mode-pill {
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .km-mode-card.active .km-mode-pill { background: var(--km-primary); color: #ffffff; }
+
+        .km-card {
+            background: var(--km-surface);
+            border: 1px solid var(--km-border);
+            border-radius: var(--km-radius);
+            padding: 11px 13px;
+            margin-bottom: 10px;
+            box-shadow: var(--km-shadow);
+        }
+
+        .km-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .km-field label {
+            display: block;
+            font-size: 0.67rem;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
+        .km-field input,
+        .km-field select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 0.8rem;
+            background: #ffffff;
+            color: var(--km-ink);
+        }
+
+        .km-typo-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .km-typo-row input {
+            flex: 1 1 180px;
+            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 0.8rem;
+        }
+
+        .km-typo-dropdown-wrap {
+            margin-bottom: 8px;
+            padding: 8px 10px;
+            background: var(--km-surface-alt);
+            border: 1px solid #c7d2fe;
+            border-radius: 8px;
+        }
+        .km-typo-dropdown-wrap select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #93c5fd;
+            border-radius: 7px;
+            font-size: 0.8rem;
+            background: #ffffff;
+            margin-top: 4px;
+        }
+
+        .km-summary-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--km-border);
+        }
+        .km-stat-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+        .km-stat {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #f1f5f9;
+        }
+        .km-stat-p { background: var(--km-success-soft); color: var(--km-success); }
+        .km-stat-a { background: var(--km-danger-soft); color: var(--km-danger); }
+        .km-stat-l { background: var(--km-amber-soft); color: var(--km-amber); }
+
+        .km-list { display: flex; flex-direction: column; gap: 5px; }
+        .km-att-row {
+            background: var(--km-surface);
+            border: 1px solid var(--km-border);
+            border-radius: 8px;
+            padding: 7px 11px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .km-att-row.state-P { border-color: #86efac; background: #f8fff9; }
+        .km-att-row.state-A { border-color: #fca5a5; background: #fff9f9; }
+        .km-att-row.state-L { border-color: #fcd34d; background: #fffdf5; }
+        .km-att-row.km-highlight { outline: 2px solid var(--km-indigo); }
+
+        .km-student-name { font-size: 0.88rem; font-weight: 700; }
+        .km-student-sub { font-size: 0.72rem; color: var(--km-muted); }
+
+        .km-mark-group { display: inline-flex; gap: 5px; flex-shrink: 0; }
+        .km-mark-btn {
+            width: 32px;
+            height: 30px;
+            border-radius: 7px;
+            border: 1.5px solid #cbd5e1;
+            background: #ffffff;
+            color: #334155;
+            font-size: 0.78rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .km-mark-btn.mark-P.active { background: var(--km-success); border-color: var(--km-success); color: #ffffff; }
+        .km-mark-btn.mark-A.active { background: var(--km-danger); border-color: var(--km-danger); color: #ffffff; }
+        .km-mark-btn.mark-L.active { background: var(--km-amber); border-color: var(--km-amber); color: #ffffff; }
+
+        .km-save-bar {
+            margin-top: 10px;
+            background: var(--km-surface);
+            border: 1px solid var(--km-border);
+            border-radius: var(--km-radius);
+            padding: 9px 13px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .km-pager-wrap {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .km-pager-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+        .km-page-num {
+            min-width: 30px;
+            height: 28px;
+            padding: 0 6px;
+            border-radius: 6px;
+            border: 1px solid var(--km-border);
+            background: #ffffff;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .km-page-num.active { background: var(--km-primary); border-color: var(--km-primary); color: #ffffff; }
+        .km-page-num:disabled { opacity: 0.4; cursor: not-allowed; }
+        .km-sub { font-size: 0.74rem; color: var(--km-muted); }
+
+        .km-student-lookup-box {
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: var(--km-surface-alt);
+            border: 1px solid var(--km-border);
+            border-radius: 8px;
+        }
+        .km-student-lookup-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+        .km-student-lookup-row input { flex: 1 1 150px; padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 7px; font-size: 0.78rem; }
+        .km-student-lookup-row select { flex: 1 1 210px; padding: 5px 8px; border: 1px solid #cbd5e1; border-radius: 7px; font-size: 0.78rem; background: #ffffff; }
+
+        .km-report-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .km-table-wrap {
+            margin-top: 8px;
+            overflow-x: auto;
+            background: var(--km-surface);
+            border: 1px solid var(--km-border);
+            border-radius: 8px;
+        }
+        .km-table { width: 100%; border-collapse: collapse; font-size: 0.76rem; }
+        .km-table th,
+        .km-table td {
+            padding: 5px 8px;
+            border-bottom: 1px solid var(--km-border);
+            text-align: left;
+            white-space: nowrap;
+        }
+        .km-table th { background: var(--km-surface-alt); font-weight: 700; }
+
+        .km-empty {
+            background: var(--km-surface);
+            border: 1px dashed #cbd5e1;
+            border-radius: var(--km-radius);
+            padding: 20px 14px;
+            text-align: center;
+            color: var(--km-muted);
+        }
+        .km-empty h3 { color: var(--km-ink); font-size: 0.9rem; margin-bottom: 3px; }
+        .km-hidden { display: none !important; }
+
+        @media print {
+            .km-topbar, .km-mode-grid, .km-no-print, #km-panel-mark { display: none !important; }
+            body { background: #ffffff; padding-bottom: 0; }
+            .km-card, .km-table-wrap { box-shadow: none; border-color: #cbd5e1; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="km-topbar">
+    <div>
+        <h1>Attendance &amp; Reports</h1>
+        <p>{{ teacher_name or 'Teacher' }} • Date: {{ today_str }}</p>
+    </div>
+    <div class="km-topbar-actions">
+        <a href="{{ url_for('teacher_dashboard') }}" class="km-btn km-btn-dark">← Return to Dashboard</a>
+        <a href="{{ url_for('teacher_registrations') }}" class="km-btn km-btn-primary">Approval Queue</a>
+        <a href="{{ url_for('teacher_register_or_edit') }}" class="km-btn km-btn-success">+ Register New</a>
+    </div>
+</header>
+
+<main class="km-container">
+
+    {% if msg %}
+    <div class="km-flash {{ 'success' if ok else 'error' }}">{{ msg }}</div>
+    {% endif %}
+
+    <section class="km-mode-grid">
+        <button type="button" class="km-mode-card" id="km-card-mark" onclick="kmSelectAttMode('mark')">
+            <div>
+                <div class="km-mode-title">Mark Attendance</div>
+                <div class="km-mode-sub">Select Class or All Classes • P / A / L</div>
+            </div>
+            <span class="km-mode-pill">Daily Mark</span>
+        </button>
+
+        <button type="button" class="km-mode-card" id="km-card-report" onclick="kmSelectAttMode('report')">
+            <div>
+                <div class="km-mode-title">Attendance Reports &amp; PDF</div>
+                <div class="km-mode-sub">Day, Month, or Single Student</div>
+            </div>
+            <span class="km-mode-pill">Report / PDF</span>
+        </button>
+    </section>
+
+    <div id="km-idle-prompt" class="km-empty">
+        <h3>Select an Attendance Card Above</h3>
+        <p>Tap <strong>Mark Attendance</strong> or <strong>Attendance Reports &amp; PDF</strong> to begin.</p>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- CARD 1: MARK ATTENDANCE                                           -->
+    <!-- ================================================================= -->
+    <section id="km-panel-mark" class="km-hidden">
+        <form method="POST" action="{{ url_for('teacher_attendance') }}" id="kmAttendanceForm">
+            <input type="hidden" name="action" value="save_attendance">
+            <input type="hidden" name="active_class" id="kmHiddenActiveClass" value="{{ selected_class or '' }}">
+            <input type="hidden" name="active_batch" id="kmHiddenActiveBatch" value="{{ selected_batch or '' }}">
+
+            <div class="km-card">
+                <div class="km-filter-grid">
+                    <div class="km-field">
+                        <label for="kmAttDate">Attendance Date</label>
+                        <input type="date" id="kmAttDate" name="attendance_date"
+                               value="{{ selected_date or today_str }}"
+                               max="{{ today_str }}"
+                               onchange="kmReloadMarkState()">
+                    </div>
+
+                    <div class="km-field">
+                        <label for="kmClassFilter">Class</label>
+                        <select id="kmClassFilter" onchange="kmOnClassChange()">
+                            <option value="" {% if not selected_class %}selected{% endif %}>-- Select Class --</option>
+                            <option value="all" {% if selected_class and selected_class|lower == 'all' %}selected{% endif %}>All Classes</option>
+                            {% for c in class_options %}
+                            <option value="{{ c }}" {% if selected_class and selected_class|lower == c|lower %}selected{% endif %}>{{ c }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="km-field">
+                        <label for="kmBatchFilter">Batch</label>
+                        <select id="kmBatchFilter" onchange="kmOnBatchChange()">
+                            <option value="" {% if not selected_batch %}selected{% endif %}>All Batches</option>
+                            {% for b in batch_options %}
+                            <option value="{{ b }}" {% if selected_batch and selected_batch|lower == b|lower %}selected{% endif %}>{{ b }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="km-typo-row">
+                    <input type="text" id="kmTypoInput" value="{{ typo_q or '' }}"
+                           placeholder="Type name or father's name for typo search..."
+                           onkeydown="if (event.key === 'Enter') { event.preventDefault(); kmRunTypoSearch(); }">
+                    <button type="button" class="km-btn km-btn-sm km-btn-indigo" onclick="kmRunTypoSearch()">
+                        Search with Typo
+                    </button>
+                    <button type="button" class="km-btn km-btn-sm km-btn-outline" onclick="kmResetMarkFilters()">
+                        Reset
+                    </button>
+                </div>
+
+                {% if active_mode == 'mark' and typo_triggered %}
+                <div id="kmTypoDropdownBox" class="km-typo-dropdown-wrap">
+                    <label for="kmTypoSelect" style="font-size:0.7rem; font-weight:700; color:#3730a3; text-transform:uppercase;">
+                        Typo Search Matches ({{ typo_dropdown_items|length }})
+                    </label>
+                    <select id="kmTypoSelect" onchange="kmFocusTypoStudent(this.value)">
+                        <option value="">-- Select Matched Student --</option>
+                        {% for item in typo_dropdown_items %}
+                        <option value="{{ item.id }}">
+                            {{ item.name }} • S/o {{ item.father_name or '—' }} • {{ item.school_class or 'Class N/A' }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div class="km-summary-bar">
+                    <div class="km-stat-pills">
+                        <span class="km-stat km-stat-p" id="kmCountP">P: 0</span>
+                        <span class="km-stat km-stat-a" id="kmCountA">A: 0</span>
+                        <span class="km-stat km-stat-l" id="kmCountL">L: 0</span>
+                        <span class="km-stat" id="kmCountU">Unmarked: 0</span>
+                    </div>
+                    <span class="km-sub" id="kmMarkStatusLabel">
+                        {% if selected_class %}
+                            Class: {{ 'All Classes' if selected_class|lower == 'all' else selected_class }} • {{ students|length }} student(s)
+                        {% elif typo_triggered %}
+                            Typo search: {{ students|length }} match(es)
+                        {% else %}
+                            No class selected
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            {% if students %}
+            <div class="km-list" id="kmAttendanceRoster">
+                {% for st in students %}
+                {% set cur_mark = saved_marks.get(st.id, '') %}
+                <div class="km-att-row {% if cur_mark in ('P', 'A', 'L') %}state-{{ cur_mark }}{% endif %}"
+                     id="km-att-row-{{ st.id }}"
+                     data-student-id="{{ st.id }}">
+                    <div>
+                        <div class="km-student-name">{{ st.name }}</div>
+                        <div class="km-student-sub">S/o {{ st.father_name or '—' }} • {{ st.school_class or 'Class N/A' }} • {{ st.batch or 'All Batches' }}</div>
+                    </div>
+
+                    <input type="hidden" name="mark_{{ st.id }}" id="mark-input-{{ st.id }}" value="{{ cur_mark }}">
+
+                    <div class="km-mark-group" role="group" aria-label="Mark attendance for {{ st.name }}">
+                        <button type="button"
+                                class="km-mark-btn mark-P {% if cur_mark == 'P' %}active{% endif %}"
+                                onclick="kmSetMark('{{ st.id }}', 'P', this)">P</button>
+                        <button type="button"
+                                class="km-mark-btn mark-A {% if cur_mark == 'A' %}active{% endif %}"
+                                onclick="kmSetMark('{{ st.id }}', 'A', this)">A</button>
+                        <button type="button"
+                                class="km-mark-btn mark-L {% if cur_mark == 'L' %}active{% endif %}"
+                                onclick="kmSetMark('{{ st.id }}', 'L', this)">L</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="km-pager-wrap" id="kmAttPagerWrap">
+                <div class="km-pager-nav" id="kmAttPagerNav"></div>
+                <div class="km-sub" id="kmAttPagerInfo"></div>
+            </div>
+
+            <div class="km-save-bar">
+                <span class="km-sub">P = Present • A = Absent • L = Leave</span>
+                <button type="submit" class="km-btn km-btn-success">Save Attendance</button>
+            </div>
+            {% else %}
+            <div class="km-empty">
+                <h3>{% if typo_triggered %}No Typo Matches Found{% else %}Select a Class to Load Students{% endif %}</h3>
+                <p>Choose a <strong>Class</strong> or <strong>All Classes</strong>, or enter a name and click <strong>Search with Typo</strong>.</p>
+            </div>
+            {% endif %}
+        </form>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- CARD 2: ATTENDANCE REPORTS & PDF                                  -->
+    <!-- ================================================================= -->
+    <section id="km-panel-report" class="km-hidden">
+        <div class="km-card">
+            <form method="POST" action="{{ url_for('teacher_attendance') }}" id="kmReportForm">
+                <input type="hidden" name="action" value="generate_report">
+                <input type="hidden" name="download_pdf" id="kmDownloadPdfInput" value="0">
+                <input type="hidden" name="typo_q_keep" value="{{ typo_q or '' }}">
+
+                <div class="km-filter-grid">
+                    <div class="km-field">
+                        <label for="kmRepScope">Report Type</label>
+                        <select id="kmRepScope" name="report_scope" onchange="kmSyncReportInputs()">
+                            <option value="day" {% if report_scope == 'day' %}selected{% endif %}>Single Day</option>
+                            <option value="month" {% if report_scope == 'month' %}selected{% endif %}>Month</option>
+                            <option value="student_month" {% if report_scope == 'student_month' %}selected{% endif %}>Single Student (Month)</option>
+                        </select>
+                    </div>
+
+                    <div class="km-field">
+                        <label for="kmRepClass">Class</label>
+                        <select id="kmRepClass" name="report_class">
+                            <option value="" {% if not report_class %}selected{% endif %}>-- Select Class --</option>
+                            <option value="all" {% if report_class and report_class|lower == 'all' %}selected{% endif %}>All Classes</option>
+                            {% for c in class_options %}
+                            <option value="{{ c }}" {% if report_class == c %}selected{% endif %}>{{ c }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="km-field">
+                        <label for="kmRepBatch">Batch</label>
+                        <select id="kmRepBatch" name="report_batch">
+                            <option value="" {% if not report_batch %}selected{% endif %}>-- Select Batch --</option>
+                            <option value="all" {% if report_batch and report_batch|lower == 'all' %}selected{% endif %}>All Batches</option>
+                            {% for b in batch_options %}
+                            <option value="{{ b }}" {% if report_batch == b %}selected{% endif %}>{{ b }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="km-field" id="kmRepDateWrap">
+                        <label for="kmRepDate">Select Date</label>
+                        <input type="date" id="kmRepDate" name="report_date"
+                               value="{{ report_date or today_str }}" max="{{ today_str }}">
+                    </div>
+
+                    <div class="km-field km-hidden" id="kmRepMonthWrap">
+                        <label for="kmRepMonth">Select Month</label>
+                        <input type="month" id="kmRepMonth" name="report_month"
+                               value="{{ report_month or current_month }}">
+                    </div>
+                </div>
+
+                <!-- Single Student Typo Search + Dropdown + Search Record -->
+                <div id="kmRepStudentBox" class="km-student-lookup-box {% if report_scope != 'student_month' %}km-hidden{% endif %}">
+                    <label style="font-size:0.68rem; font-weight:700; color:#475569; text-transform:uppercase;">
+                        Single Student Lookup (Typo Search Dropdown)
+                    </label>
+                    <div class="km-student-lookup-row">
+                        <input type="text" id="kmRepTypoQuery" value="{{ typo_q or '' }}"
+                               placeholder="Type student name for typo match..."
+                               onkeydown="if (event.key === 'Enter') { event.preventDefault(); kmFetchReportTypoStudents(); }">
+                        <button type="button" class="km-btn km-btn-sm km-btn-indigo" onclick="kmFetchReportTypoStudents()">
+                            Find Student
+                        </button>
+                        <select id="kmRepStudentSelect" name="report_student_id">
+                            <option value="">
+                                {% if typo_triggered and active_mode == 'report' %}
+                                    -- Select Matching Student ({{ typo_dropdown_items|length }}) --
+                                {% else %}
+                                    -- Click Find Student First --
+                                {% endif %}
+                            </option>
+                            {% if active_mode == 'report' %}
+                                {% for item in typo_dropdown_items %}
+                                <option value="{{ item.id }}" {% if report_student_id == item.id %}selected{% endif %}>
+                                    {{ item.name }} • S/o {{ item.father_name or '—' }} • {{ item.school_class or 'Class N/A' }}
+                                </option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                        <button type="submit" class="km-btn km-btn-sm km-btn-primary"
+                                onclick="document.getElementById('kmDownloadPdfInput').value='0'">
+                            Search Record
+                        </button>
+                    </div>
+                </div>
+
+                <div class="km-report-actions km-no-print">
+                    <span class="km-sub">Queried from database only when requested.</span>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                        <button type="submit" class="km-btn km-btn-sm km-btn-primary"
+                                onclick="document.getElementById('kmDownloadPdfInput').value='0'">
+                            Generate Report
+                        </button>
+                        <button type="submit" class="km-btn km-btn-sm km-btn-success"
+                                onclick="document.getElementById('kmDownloadPdfInput').value='1'">
+                            Generate PDF Report
+                        </button>
+                        <button type="button" class="km-btn km-btn-sm km-btn-amber" onclick="window.print()">
+                            Print
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% if report_rows is not none %}
+        <div class="km-card">
+            <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px;">
+                <div>
+                    <div style="font-size:0.92rem; font-weight:700;">{{ report_title }}</div>
+                    <div class="km-sub">{{ report_subtitle }}</div>
+                </div>
+                <span class="km-sub">{{ report_rows|length }} record(s)</span>
+            </div>
+
+            {% if report_rows %}
+            <div class="km-table-wrap">
+                <table class="km-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Father</th>
+                            <th>Class</th>
+                            <th>Batch</th>
+                            {% if report_scope == 'day' %}
+                            <th>Date</th>
+                            <th>Status</th>
+                            {% else %}
+                            <th>P</th>
+                            <th>A</th>
+                            <th>L</th>
+                            {% if report_scope == 'student_month' %}
+                            <th>Month Log</th>
+                            {% endif %}
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in report_rows %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td><strong>{{ row.name }}</strong></td>
+                            <td>{{ row.father_name or '—' }}</td>
+                            <td>{{ row.school_class }}</td>
+                            <td>{{ row.batch }}</td>
+                            {% if report_scope == 'day' %}
+                            <td>{{ row.attendance_date }}</td>
+                            <td><strong>{{ row.status_label }}</strong></td>
+                            {% else %}
+                            <td>{{ row.p_count }}</td>
+                            <td>{{ row.a_count }}</td>
+                            <td>{{ row.l_count }}</td>
+                            {% if report_scope == 'student_month' %}
+                            <td style="white-space:normal; max-width:260px;">{{ row.day_breakdown or '—' }}</td>
+                            {% endif %}
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="km-empty" style="margin-top:8px;">
+                <h3>No Records Found</h3>
+                <p>No attendance records matched the selected filters.</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+</main>
+
+<script>
+    var kmAttMode = null;
+    var kmAttPage = 1;
+    var kmAttPageSize = 30;
+
+    function kmSelectAttMode(mode) {
+        kmAttMode = mode;
+        var markCard = document.getElementById("km-card-mark");
+        var repCard = document.getElementById("km-card-report");
+        if (markCard) markCard.classList.toggle("active", mode === "mark");
+        if (repCard) repCard.classList.toggle("active", mode === "report");
+
+        document.getElementById("km-idle-prompt").classList.toggle("km-hidden", Boolean(mode));
+        document.getElementById("km-panel-mark").classList.toggle("km-hidden", mode !== "mark");
+        document.getElementById("km-panel-report").classList.toggle("km-hidden", mode !== "report");
+
+        if (mode === "mark") {
+            kmRenderMarkPage();
+            kmUpdateCounts();
+        } else if (mode === "report") {
+            kmSyncReportInputs();
+        }
+    }
+
+    function kmSetMark(studentId, code, btnEl) {
+        var input = document.getElementById("mark-input-" + studentId);
+        var row = btnEl ? btnEl.closest(".km-att-row") : null;
+        if (!input || !row) return;
+
+        var nextCode = (input.value === code) ? "" : code;
+        input.value = nextCode;
+
+        row.classList.remove("state-P", "state-A", "state-L");
+        if (nextCode) row.classList.add("state-" + nextCode);
+
+        row.querySelectorAll(".km-mark-btn").forEach(function (b) {
+            b.classList.remove("active");
+        });
+        if (nextCode) {
+            var activeBtn = row.querySelector(".mark-" + nextCode);
+            if (activeBtn) activeBtn.classList.add("active");
+        }
+        kmUpdateCounts();
+    }
+
+    function kmUpdateCounts() {
+        var p = 0, a = 0, l = 0, u = 0;
+        document.querySelectorAll(".km-att-row").forEach(function (row) {
+            var hid = row.querySelector("input[type='hidden'][id^='mark-input-']");
+            var val = hid ? hid.value : "";
+            if (val === "P") p++;
+            else if (val === "A") a++;
+            else if (val === "L") l++;
+            else u++;
+        });
+        var elP = document.getElementById("kmCountP");
+        var elA = document.getElementById("kmCountA");
+        var elL = document.getElementById("kmCountL");
+        var elU = document.getElementById("kmCountU");
+        if (elP) elP.textContent = "P: " + p;
+        if (elA) elA.textContent = "A: " + a;
+        if (elL) elL.textContent = "L: " + l;
+        if (elU) elU.textContent = "Unmarked: " + u;
+    }
+
+    function kmReloadMarkState(extraParams) {
+        var url = new URL(window.location.href);
+        url.searchParams.set("mode", "mark");
+
+        var dt = document.getElementById("kmAttDate")?.value || "";
+        var cls = document.getElementById("kmClassFilter")?.value || "";
+        var bat = document.getElementById("kmBatchFilter")?.value || "";
+
+        if (dt) url.searchParams.set("date", dt);
+        if (cls) url.searchParams.set("class", cls); else url.searchParams.delete("class");
+        if (bat) url.searchParams.set("batch", bat); else url.searchParams.delete("batch");
+
+        url.searchParams.delete("typo_q");
+        url.searchParams.delete("typo_run");
+
+        if (extraParams) {
+            Object.keys(extraParams).forEach(function (k) {
+                if (extraParams[k]) url.searchParams.set(k, extraParams[k]);
+                else url.searchParams.delete(k);
+            });
+        }
+        window.location.href = url.toString();
+    }
+
+    function kmOnClassChange() {
+        var cls = document.getElementById("kmClassFilter")?.value || "";
+        document.getElementById("kmHiddenActiveClass").value = cls;
+        kmReloadMarkState();
+    }
+
+    function kmOnBatchChange() {
+        var bat = document.getElementById("kmBatchFilter")?.value || "";
+        document.getElementById("kmHiddenActiveBatch").value = bat;
+        kmReloadMarkState();
+    }
+
+    function kmRunTypoSearch() {
+        var q = (document.getElementById("kmTypoInput")?.value || "").trim();
+        if (!q) return;
+        kmReloadMarkState({ typo_q: q, typo_run: "1" });
+    }
+
+    function kmFocusTypoStudent(sid) {
+        if (!sid) return;
+        var rows = Array.prototype.slice.call(document.querySelectorAll(".km-att-row"));
+        var idx = rows.findIndex(function (r) {
+            return String(r.getAttribute("data-student-id")) === String(sid);
+        });
+        if (idx !== -1) {
+            kmAttPage = Math.floor(idx / kmAttPageSize) + 1;
+            kmRenderMarkPage();
+            rows.forEach(function (r) { r.classList.remove("km-highlight"); });
+            rows[idx].classList.add("km-highlight");
+            rows[idx].scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+    }
+
+    function kmResetMarkFilters() {
+        var url = new URL(window.location.href);
+        url.searchParams.set("mode", "mark");
+        url.searchParams.delete("class");
+        url.searchParams.delete("batch");
+        url.searchParams.delete("typo_q");
+        url.searchParams.delete("typo_run");
+        window.location.href = url.toString();
+    }
+
+    function kmMakePagerBtn(label, targetPage, totalPages, isActive, isDisabled) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "km-page-num" + (isActive ? " active" : "");
+        btn.textContent = label;
+        btn.disabled = Boolean(isDisabled);
+        btn.onclick = function () {
+            kmAttPage = Math.max(1, Math.min(totalPages, targetPage));
+            kmRenderMarkPage();
+        };
+        return btn;
+    }
+
+    function kmRenderMarkPage() {
+        var rows = Array.prototype.slice.call(document.querySelectorAll(".km-att-row"));
+        var nav = document.getElementById("kmAttPagerNav");
+        var info = document.getElementById("kmAttPagerInfo");
+        if (!rows.length) {
+            if (nav) nav.innerHTML = "";
+            if (info) info.textContent = "";
+            return;
+        }
+
+        var totalMatched = rows.length;
+        var totalPages = Math.max(1, Math.ceil(totalMatched / kmAttPageSize));
+        if (kmAttPage > totalPages) kmAttPage = totalPages;
+
+        var startIdx = (kmAttPage - 1) * kmAttPageSize;
+        var endIdx = Math.min(startIdx + kmAttPageSize, totalMatched);
+
+        rows.forEach(function (r, i) {
+            r.classList.toggle("km-hidden", i < startIdx || i >= endIdx);
+        });
+
+        if (nav) {
+            nav.innerHTML = "";
+            nav.appendChild(kmMakePagerBtn("<<", 1, totalPages, false, kmAttPage <= 1));
+            nav.appendChild(kmMakePagerBtn("<", kmAttPage - 1, totalPages, false, kmAttPage <= 1));
+
+            var winSize = 5;
+            var sP = Math.max(1, kmAttPage - Math.floor(winSize / 2));
+            var eP = Math.min(totalPages, sP + winSize - 1);
+            if (eP - sP + 1 < winSize) sP = Math.max(1, eP - winSize + 1);
+            for (var p = sP; p <= eP; p++) {
+                nav.appendChild(kmMakePagerBtn(String(p), p, totalPages, p === kmAttPage, false));
+            }
+
+            nav.appendChild(kmMakePagerBtn(">", kmAttPage + 1, totalPages, false, kmAttPage >= totalPages));
+            nav.appendChild(kmMakePagerBtn(">>", totalPages, totalPages, false, kmAttPage >= totalPages));
+        }
+        if (info) {
+            info.textContent = "List " + kmAttPage + " of " + totalPages + " (" + (startIdx + 1) + "–" + endIdx + " of " + totalMatched + ")";
+        }
+    }
+
+    function kmSyncReportInputs() {
+        var scope = document.getElementById("kmRepScope")?.value || "day";
+        var dateWrap = document.getElementById("kmRepDateWrap");
+        var monthWrap = document.getElementById("kmRepMonthWrap");
+        var stuBox = document.getElementById("kmRepStudentBox");
+
+        if (scope === "day") {
+            if (dateWrap) dateWrap.classList.remove("km-hidden");
+            if (monthWrap) monthWrap.classList.add("km-hidden");
+            if (stuBox) stuBox.classList.add("km-hidden");
+        } else if (scope === "month") {
+            if (dateWrap) dateWrap.classList.add("km-hidden");
+            if (monthWrap) monthWrap.classList.remove("km-hidden");
+            if (stuBox) stuBox.classList.add("km-hidden");
+        } else {
+            if (dateWrap) dateWrap.classList.add("km-hidden");
+            if (monthWrap) monthWrap.classList.remove("km-hidden");
+            if (stuBox) stuBox.classList.remove("km-hidden");
+        }
+    }
+
+    function kmFetchReportTypoStudents() {
+        var q = (document.getElementById("kmRepTypoQuery")?.value || "").trim();
+        var scope = document.getElementById("kmRepScope")?.value || "student_month";
+        var cls = document.getElementById("kmRepClass")?.value || "";
+        var bat = document.getElementById("kmRepBatch")?.value || "";
+        var dt = document.getElementById("kmRepDate")?.value || "";
+        var mo = document.getElementById("kmRepMonth")?.value || "";
+        if (!q) return;
+
+        var url = new URL(window.location.href);
+        url.searchParams.set("mode", "report");
+        url.searchParams.set("report_scope", scope);
+        url.searchParams.set("typo_q", q);
+        url.searchParams.set("typo_run", "1");
+        if (cls) url.searchParams.set("report_class", cls);
+        if (bat) url.searchParams.set("report_batch", bat);
+        if (dt) url.searchParams.set("report_date", dt);
+        if (mo) url.searchParams.set("report_month", mo);
+        window.location.href = url.toString();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var initialMode = "{{ active_mode or '' }}";
+        if (initialMode === "mark" || initialMode === "report") {
+            kmSelectAttMode(initialMode);
+        }
+        kmSyncReportInputs();
+    });
+</script>
+</body>
+</html>

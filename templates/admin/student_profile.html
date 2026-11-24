@@ -1,0 +1,203 @@
+{% extends "common/base.html" %}
+
+{% block title %}Review Admission - {{ student.name }} - KM Campus{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-admin: #1e3c72;
+        --bg-color: #f4f7fa;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+    }
+
+    body { background: var(--bg-color); padding: 20px; color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .container { max-width: 900px; margin: auto; }
+
+    /* Header Bar */
+    .header-bar { 
+        background: var(--card-bg); padding: 20px 25px; border-radius: 14px; 
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05); display: flex; 
+        justify-content: space-between; align-items: center; margin-bottom: 25px; 
+        border: 1px solid #e2e8f0; 
+    }
+    .header-bar h2 { margin: 0; color: var(--primary-admin); font-size: 20px; font-weight: 700; }
+    .back-btn { 
+        background: #e2e8f0; color: #334155; padding: 8px 14px; border-radius: 8px; 
+        text-decoration: none; font-size: 13px; font-weight: 600; transition: background 0.2s; 
+    }
+    .back-btn:hover { background: #cbd5e1; }
+
+    /* Section Cards */
+    .profile-card {
+        background: var(--card-bg); border-radius: 14px; border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05); padding: 30px; margin-bottom: 20px;
+    }
+    .section-title {
+        font-size: 15px; font-weight: 700; color: var(--primary-admin);
+        border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px; margin-top: 0;
+    }
+
+    /* Top Section (Profile Photo + Personal Details) */
+    .top-section { display: flex; gap: 30px; align-items: center; flex-wrap: wrap; }
+    .profile-photo {
+        width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
+        border: 3px solid #cbd5e1; background: #e2e8f0;
+    }
+    .profile-avatar-placeholder {
+        width: 120px; height: 120px; border-radius: 50%; background: #e2e8f0; color: #475569;
+        display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold;
+        border: 3px solid #cbd5e1;
+    }
+    .top-info-grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+
+    /* Info Groups */
+    .info-group label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 3px; }
+    .info-group span { font-size: 14px; font-weight: 600; color: var(--text-main); }
+
+    /* Middle Section (Address Multi-Line View) */
+    .address-box {
+        background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px;
+        font-size: 15px; line-height: 1.8; color: var(--text-main);
+    }
+
+    /* Document Preview Box */
+    .doc-preview-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; text-align: center; }
+    .doc-preview-box img { max-width: 100%; max-height: 300px; border-radius: 6px; border: 1px solid #cbd5e1; margin-top: 10px; }
+
+    /* Action Footer Buttons */
+    .action-footer {
+        display: flex; justify-content: space-between; align-items: center; background: var(--card-bg);
+        padding: 20px 30px; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .btn-main {
+        padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 700;
+        text-decoration: none; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+        transition: opacity 0.2s;
+    }
+    .btn-main:hover { opacity: 0.9; }
+    .btn-approve { background: #10b981; color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
+    .btn-reject { background: #ef4444; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <!-- Header Bar -->
+    .header-bar { 
+        background: var(--card-bg); padding: 20px 25px; border-radius: 14px; 
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05); display: flex; 
+        justify-content: space-between; align-items: center; margin-bottom: 25px; 
+        border: 1px solid #e2e8f0; 
+    }
+    <div class="header-bar">
+        <div>
+            <h2>🔍 Student Application Review</h2>
+            <small style="color: var(--text-muted);">Inspecting submitted credentials prior to activation</small>
+        </div>
+        <a href="/admin/registrations" class="back-btn">&larr; Back to Approvals Queue</a>
+    </div>
+
+    <!-- Top Section: Profile Photo & Personal Details -->
+    <div class="profile-card">
+        <h4 class="section-title">👤 Personal & Academic Information</h4>
+        <div class="top-section">
+            <div>
+                {% if student.photo %}
+                <img src="{{ url_for('static', filename='uploads/' + student.photo) }}" alt="Student Photo" class="profile-photo">
+                {% else %}
+                <div class="profile-avatar-placeholder">
+                    {{ student.name[0] | upper }}
+                </div>
+                {% endif %}
+            </div>
+            <div class="top-info-grid">
+                <div class="info-group">
+                    <label>Full Name</label>
+                    <span>{{ student.name }}</span>
+                </div>
+                <div class="info-group">
+                    <label>Username</label>
+                    <span>@{{ student.username }}</span>
+                </div>
+                <div class="info-group">
+                    <label>Father's Name</label>
+                    <span>{{ student.father_name or 'N/A' }}</span>
+                </div>
+                <div class="info-group">
+                    <label>Date of Birth</label>
+                    <span>{{ student.dob or 'N/A' }}</span>
+                </div>
+                <div class="info-group">
+                    <label>Gender</label>
+                    <span>{{ student.gender or 'N/A' }}</span>
+                </div>
+                <div class="info-group">
+                    <label>School Class / Batch</label>
+                    <span>{{ student.school_class or 'N/A' }} ({{ student.batch or 'Morning' }})</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Middle Section: Address Hierarchy in Multi-Line View -->
+    <div class="profile-card">
+        <h4 class="section-title">📍 Address Hierarchy</h4>
+        <div class="address-box">
+            <strong>Village / Locality:</strong> {{ student.village or 'N/A' }}<br>
+            <strong>Post Office:</strong> {{ student.post or 'N/A' }} | <strong>Police Station:</strong> {{ student.police_station or 'N/A' }}<br>
+            <strong>Block / Sub-division:</strong> {{ student.block or 'N/A' }} / {{ student.subdivision or 'N/A' }}<br>
+            <strong>District:</strong> {{ student.district or 'N/A' }} | <strong>State:</strong> {{ student.state or 'N/A' }} | <strong>Country:</strong> India (PIN: {{ student.pincode or 'N/A' }})
+        </div>
+    </div>
+
+    <!-- Lower Section: Verification Details & Uploaded Document Photo -->
+    <div class="profile-card">
+        <h4 class="section-title">📄 Verification & Identity Proof</h4>
+        <div class="top-info-grid" style="margin-bottom: 20px;">
+            <div class="info-group">
+                <label>Aadhaar Card Number</label>
+                <span style="font-family: monospace; font-size: 15px; color: #1e3c72; letter-spacing: 1px;">
+                    {{ student.aadhaar or 'Not Provided' }}
+                </span>
+            </div>
+            <div class="info-group">
+                <label>Contact Phone</label>
+                <span>{{ student.phone or 'N/A' }}</span>
+            </div>
+            <div class="info-group">
+                <label>Email Address</label>
+                <span>{{ student.email or 'N/A' }}</span>
+            </div>
+        </div>
+
+        <div class="doc-preview-box">
+            <label style="font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 8px;">Uploaded Document Scan / Photo</label>
+            {% if student.aadhaar_doc %}
+            <a href="{{ url_for('static', filename='uploads/' + student.aadhaar_doc) }}" target="_blank" style="font-size: 13px; font-weight: 600; color: var(--primary-admin);">
+                🔍 Open Full-Screen Document Image
+            </a><br>
+            <img src="{{ url_for('static', filename='uploads/' + student.aadhaar_doc) }}" alt="Identity Document Scan">
+            {% else %}
+            <p style="margin: 0; font-size: 13px; color: var(--text-muted);">No verification document was attached during registration.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Action Footer: Approve, Reject, and Back -->
+    <div class="action-footer">
+        <a href="/admin/registrations" class="back-btn">&larr; Back to Approvals Queue</a>
+        <div style="display: flex; gap: 15px;">
+            <a href="/delete/{{ student.id }}" class="btn-main btn-reject" onclick="return confirm('Are you sure you want to reject and delete {{ student.name }}?');">
+                ✕ Reject Application
+            </a>
+            <a href="/approve/{{ student.id }}" class="btn-main btn-approve" onclick="return confirm('Are you sure you want to approve {{ student.name }}? This will grant active portal access.');">
+                ✓ Confirm & Approve
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

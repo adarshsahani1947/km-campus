@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step 2: Gender, Address &amp; Documents - KM Campus Banwaripur</title>
+    <style>
+        :root { --primary: #2575fc; --secondary: #6a11cb; --success: #27ae60; --danger: #e74c3c; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 20px;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        }
+        .card {
+            background: #ffffff; width: 100%; max-width: 580px;
+            border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.25); overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white; padding: 24px 20px; text-align: center;
+        }
+        .header h1 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
+        .header p { margin: 5px 0 0; font-size: 13px; opacity: 0.85; }
+        
+        .form-body { padding: 28px; }
+        .steps { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 12px; font-weight: bold; color: #64748b; }
+        .steps span { padding: 5px 12px; border-radius: 20px; background: #e2e8f0; }
+        .steps span.done { background: #d4edda; color: #155724; }
+        .steps span.active { background: var(--primary); color: white; box-shadow: 0 3px 8px rgba(37, 117, 252, 0.3); }
+
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 500px) { .row { grid-template-columns: 1fr; } }
+
+        label { font-weight: 600; font-size: 13px; color: #334155; display: block; margin-top: 14px; margin-bottom: 5px; }
+        .req-badge { color: var(--danger); font-weight: bold; }
+        .opt-badge { background: #eef2f7; color: #5a6a85; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; margin-left: 4px; }
+        
+        input, select {
+            width: 100%; padding: 10px 12px; box-sizing: border-box;
+            border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #f9fbfd;
+            transition: all 0.25s ease;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.15); }
+        
+        .conditional-input { margin-top: 8px; display: none; }
+
+        #aadhaar_display {
+            letter-spacing: 3px; font-family: 'Courier New', Courier, monospace;
+            font-weight: bold; font-size: 16px; text-align: center;
+        }
+
+        .upload-box {
+            margin-top: 14px; background: #f8fafc; border: 1.5px dashed #cbd5e1;
+            padding: 14px; border-radius: 10px; transition: border-color 0.2s;
+        }
+        .upload-box:hover { border-color: var(--primary); }
+        .upload-box label { margin-top: 0; }
+        .size-hint { font-size: 11px; color: #64748b; display: block; margin-bottom: 8px; }
+        .file-error { color: var(--danger); font-size: 11px; font-weight: bold; margin-top: 6px; display: none; }
+        
+        /* Large, recognizable in-page preview container */
+        .preview-wrap {
+            display: none; margin-top: 12px; flex-direction: column; align-items: center;
+            background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .preview-wrap img.photo-thumb {
+            width: 140px; height: 140px; object-fit: cover; border-radius: 10px;
+            border: 2px solid #cbd5e1; box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .preview-wrap img.doc-thumb {
+            width: 100%; max-width: 340px; max-height: 220px; object-fit: contain;
+            border-radius: 8px; border: 1.5px solid #cbd5e1; background: #f1f5f9;
+        }
+        .pdf-badge {
+            display: none; padding: 18px 24px; background: #eff6ff; border: 1.5px solid #bfdbfe;
+            border-radius: 8px; color: #1e40af; font-weight: bold; font-size: 13px; text-align: center;
+        }
+        .preview-footer {
+            width: 100%; display: flex; justify-content: space-between; align-items: center;
+            margin-top: 10px; padding-top: 8px; border-top: 1px solid #f1f5f9; gap: 10px;
+        }
+        .preview-info { flex: 1; font-size: 12px; font-weight: 600; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .clear-btn { background: #fee2e2; color: var(--danger); border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .clear-btn:hover { background: #fecaca; }
+
+        .error-box { background: #fee2e2; border: 1px solid var(--danger); color: #b91c1c; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; text-align: center; font-weight: 600; }
+
+        button.submit-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+            color: white; border: none; padding: 14px; width: 100%;
+            border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 24px;
+            box-shadow: 0 4px 14px rgba(39, 174, 96, 0.35); transition: transform 0.2s, opacity 0.2s;
+        }
+        button.submit-btn:hover { transform: translateY(-1px); opacity: 0.96; }
+
+        .back-row { text-align: center; margin-top: 16px; }
+        .back-link { color: #64748b; text-decoration: none; font-size: 13px; font-weight: 600; }
+        .back-link:hover { color: var(--primary); text-decoration: underline; }
+
+        /* Writing Animation Overlay */
+        #writing-overlay { display: none; text-align: center; padding: 45px 20px; }
+        .paper-sheet {
+            width: 140px; height: 170px; background: #fffdf7;
+            border: 2px solid #cbd5e1; border-radius: 6px; margin: 0 auto 20px auto;
+            position: relative; box-shadow: 0 6px 15px rgba(0,0,0,0.08); padding: 18px 14px; box-sizing: border-box;
+        }
+        .ink-line { height: 4px; background: #2575fc; border-radius: 2px; margin-bottom: 14px; width: 0%; }
+        .line-1 { animation: writeLine 1.2s ease-out forwards; }
+        .line-2 { animation: writeLine 1.2s ease-out 0.6s forwards; }
+        .line-3 { animation: writeLine 1.2s ease-out 1.2s forwards; }
+        .line-4 { animation: writeLine 1.0s ease-out 1.8s forwards; width: 60%; }
+        @keyframes writeLine { from { width: 0%; } to { width: 100%; } }
+        .pen-icon { font-size: 38px; position: absolute; top: 10px; left: 10px; animation: movePen 2.5s infinite ease-in-out; transform-origin: bottom left; }
+        @keyframes movePen {
+            0%   { transform: translate(0px, 0px) rotate(0deg); }
+            20%  { transform: translate(85px, 4px) rotate(-8deg); }
+            50%  { transform: translate(0px, 36px) rotate(0deg); }
+            100% { transform: translate(65px, 58px) rotate(-5deg); }
+        }
+        .writing-title { font-size: 18px; font-weight: bold; color: #1e3c72; margin-bottom: 6px; }
+        .writing-sub { font-size: 13px; color: #64748b; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="header">
+        <h1>🎓 KM CAMPUS, BANWARIPUR</h1>
+        <p>Step 2: Gender, Address &amp; Documents</p>
+    </div>
+
+    <div class="form-body" id="form-container">
+        <div class="steps">
+            <span class="done">✓ Step 1: Details</span>
+            <span>&rarr;</span>
+            <span class="active">Step 2: Gender, Address &amp; Documents</span>
+        </div>
+
+        {% if error %}
+            <div class="error-box">⚠️ {{ error }}</div>
+        {% endif %}
+
+        <form id="step2Form" action="/register/step2" method="POST" enctype="multipart/form-data" onsubmit="return handleFormSubmit(event)">
+            
+            <div class="row">
+                <div>
+                    <label>Gender <span class="req-badge">*</span></label>
+                    <select name="gender" required>
+                        <option value="" disabled selected>Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Class / School Name <span class="opt-badge">Optional</span></label>
+                    <input type="text" name="school_class" placeholder="e.g. Class 10 / High School">
+                </div>
+            </div>
+
+            <h3 style="font-size: 14px; color: #1e3c72; margin-top: 20px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px;">📍 Mandatory Address Hierarchy</h3>
+
+            <!-- Country Selection -->
+            <label>Country <span class="req-badge">*</span></label>
+            <select name="country" id="countrySelect" onchange="toggleManualInput('countrySelect', 'countryManual')" required>
+                <option value="India" selected>India</option>
+                <option value="Other">Other (Enter Manually)</option>
+            </select>
+            <input type="text" id="countryManual" name="country_manual" class="conditional-input" placeholder="Enter Country Name">
+
+            <!-- State Selection -->
+            <label>State <span class="req-badge">*</span></label>
+            <select name="state" id="stateSelect" onchange="toggleManualInput('stateSelect', 'stateManual')" required>
+                <option value="Bihar" selected>Bihar</option>
+                <option value="Other">Other (Enter Manually)</option>
+            </select>
+            <input type="text" id="stateManual" name="state_manual" class="conditional-input" placeholder="Enter State Name">
+
+            <!-- District Selection -->
+            <label>District <span class="req-badge">*</span></label>
+            <select name="district" id="districtSelect" onchange="toggleManualInput('districtSelect', 'districtManual')" required>
+                <option value="Begusarai" selected>Begusarai</option>
+                <option value="Other">Other (Enter Manually)</option>
+            </select>
+            <input type="text" id="districtManual" name="district_manual" class="conditional-input" placeholder="Enter District Name">
+
+            <!-- Subdivision Selection -->
+            <label>Subdivision <span class="req-badge">*</span></label>
+            <select name="subdivision" id="subdivisionSelect" onchange="toggleManualInput('subdivisionSelect', 'subdivisionManual')" required>
+                <option value="Teghra" selected>Teghra</option>
+                <option value="Other">Other (Enter Manually)</option>
+            </select>
+            <input type="text" id="subdivisionManual" name="subdivision_manual" class="conditional-input" placeholder="Enter Subdivision Name">
+
+            <!-- Block Selection -->
+            <label>Block <span class="req-badge">*</span></label>
+            <select name="block" id="blockSelect" onchange="toggleManualInput('blockSelect', 'blockManual')" required>
+                <option value="" disabled selected>Select Block</option>
+                <option value="Bhagwanpur">Bhagwanpur</option>
+                <option value="Bacchwara">Bacchwara</option>
+                <option value="Other">Other (Enter Manually)</option>
+            </select>
+            <input type="text" id="blockManual" name="block_manual" class="conditional-input" placeholder="Enter Block Name">
+
+            <div class="row">
+                <div>
+                    <label>Post Office (P.O.) <span class="req-badge">*</span></label>
+                    <input type="text" name="post" placeholder="Enter Post Office" required>
+                </div>
+                <div>
+                    <label>Village / Locality <span class="req-badge">*</span></label>
+                    <input type="text" name="village" placeholder="Enter Village / Street" required>
+                </div>
+            </div>
+
+            <h3 style="font-size: 14px; color: #1e3c72; margin-top: 22px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px;">📄 Verification Documents &amp; ID</h3>
+
+            <label>Aadhaar Card Number <span class="opt-badge">Optional • 12 Digits</span></label>
+            <input type="text" id="aadhaar_display" inputmode="numeric" maxlength="14" oninput="formatAadhaar(this)">
+            <input type="hidden" id="aadhaar_clean" name="aadhaar">
+
+            <!-- Profile Photo Upload (Limit: 515 KB) -->
+            <div class="upload-box">
+                <label>Profile Photo <span class="opt-badge">Optional</span></label>
+                <span class="size-hint">Max size: <b>515 KB</b> (JPG, PNG, WEBP)</span>
+                <input type="file" id="photo" name="photo" accept="image/*" onchange="handleFileSelect(this, 515, 'photo-err', 'photo-preview', 'photo-img', null, 'photo-name')">
+                <div id="photo-err" class="file-error">⚠️ File exceeds 515 KB limit! Please choose a smaller file.</div>
+                <div id="photo-preview" class="preview-wrap">
+                    <img id="photo-img" class="photo-thumb" src="" alt="Profile Photo Preview">
+                    <div class="preview-footer">
+                        <div id="photo-name" class="preview-info"></div>
+                        <button type="button" class="clear-btn" onclick="clearFile('photo', 'photo-preview', 'photo-err')">Remove</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aadhaar Document Upload (Limit: 600 KB) -->
+            <div class="upload-box">
+                <label>Aadhaar Document <span class="opt-badge">Optional</span></label>
+                <span class="size-hint">Max size: <b>600 KB</b> (JPG, PNG, PDF)</span>
+                <input type="file" id="aadhaar_doc" name="aadhaar_doc" accept="image/*,.pdf" onchange="handleFileSelect(this, 600, 'doc-err', 'doc-preview', 'doc-img', 'doc-pdf-badge', 'doc-name')">
+                <div id="doc-err" class="file-error">⚠️ File exceeds 600 KB limit! Please choose a smaller file.</div>
+                <div id="doc-preview" class="preview-wrap">
+                    <img id="doc-img" class="doc-thumb" src="" alt="Aadhaar Document Preview">
+                    <div id="doc-pdf-badge" class="pdf-badge">📄 PDF Document Attached &amp; Ready</div>
+                    <div class="preview-footer">
+                        <div id="doc-name" class="preview-info"></div>
+                        <button type="button" class="clear-btn" onclick="clearFile('aadhaar_doc', 'doc-preview', 'doc-err')">Remove</button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">✍️ Finalize &amp; Submit Registration</button>
+        </form>
+
+        <div class="back-row">
+            <a href="/register" class="back-link">&larr; Edit Step 1 Details</a>
+        </div>
+    </div>
+
+    <!-- Writing Animation Overlay -->
+    <div id="writing-overlay">
+        <div class="paper-sheet">
+            <div class="pen-icon">🖋️</div>
+            <div class="ink-line line-1"></div>
+            <div class="ink-line line-2"></div>
+            <div class="ink-line line-3"></div>
+            <div class="ink-line line-4"></div>
+        </div>
+        <div class="writing-title">Recording your admission...</div>
+        <div class="writing-sub">Our pens are working on your registration form.<br>Confirmation shortly!</div>
+    </div>
+</div>
+
+<script>
+    function toggleManualInput(selectId, manualInputId) {
+        const selectEl = document.getElementById(selectId);
+        const manualEl = document.getElementById(manualInputId);
+        if (selectEl.value === 'Other') {
+            manualEl.style.display = 'block';
+            manualEl.setAttribute('required', 'true');
+        } else {
+            manualEl.style.display = 'none';
+            manualEl.removeAttribute('required');
+            manualEl.value = '';
+        }
+    }
+
+    function formatAadhaar(input) {
+        let digits = input.value.replace(/\D/g, '').substring(0, 12);
+        document.getElementById('aadhaar_clean').value = digits;
+        let parts = digits.match(/.{1,4}/g);
+        input.value = parts ? parts.join(' ') : '';
+    }
+
+    // Client-side file size validator (maxSizeKB: 515 for photo, 600 for doc)
+    function handleFileSelect(input, maxSizeKB, errorId, previewId, imgId, pdfBadgeId, nameId) {
+        const errDiv = document.getElementById(errorId);
+        const previewWrap = document.getElementById(previewId);
+        const imgEl = document.getElementById(imgId);
+        const pdfBadge = pdfBadgeId ? document.getElementById(pdfBadgeId) : null;
+        const nameEl = document.getElementById(nameId);
+
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const fileSizeKB = file.size / 1024;
+
+            if (fileSizeKB > maxSizeKB) {
+                errDiv.style.display = 'block';
+                previewWrap.style.display = 'none';
+                input.value = '';
+                return false;
+            }
+
+            errDiv.style.display = 'none';
+            nameEl.textContent = file.name + ' (' + (fileSizeKB >= 1024 ? (fileSizeKB / 1024).toFixed(2) + ' MB' : fileSizeKB.toFixed(0) + ' KB') + ')';
+
+            if (file.type === 'application/pdf') {
+                imgEl.style.display = 'none';
+                if (pdfBadge) pdfBadge.style.display = 'block';
+                previewWrap.style.display = 'flex';
+            } else {
+                if (pdfBadge) pdfBadge.style.display = 'none';
+                imgEl.style.display = 'block';
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imgEl.src = e.target.result;
+                    previewWrap.style.display = 'flex';
+                };
+                reader.readAsDataURL(file);
+            }
+            return true;
+        }
+
+        errDiv.style.display = 'none';
+        previewWrap.style.display = 'none';
+        return true;
+    }
+
+    function clearFile(inputId, previewId, errorId) {
+        document.getElementById(inputId).value = '';
+        document.getElementById(previewId).style.display = 'none';
+        document.getElementById(errorId).style.display = 'none';
+    }
+
+    function handleFormSubmit(event) {
+        const cleanAadhaar = document.getElementById('aadhaar_clean').value;
+        if (cleanAadhaar.length > 0 && cleanAadhaar.length !== 12) {
+            alert("If entering an Aadhaar number, it must be exactly 12 digits.");
+            event.preventDefault();
+            return false;
+        }
+
+        event.preventDefault();
+        document.getElementById('form-container').style.display = 'none';
+        document.getElementById('writing-overlay').style.display = 'block';
+
+        setTimeout(() => {
+            document.getElementById('step2Form').submit();
+        }, 1800);
+        return true;
+    }
+</script>
+
+</body>
+</html>

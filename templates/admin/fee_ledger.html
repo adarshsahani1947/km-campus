@@ -1,0 +1,1424 @@
+{% extends "common/base.html" %}
+
+{% block title %}Fee Status & Ledgers - {{ stat_period_label }} - KM Campus{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-admin: #1e3c72;
+        --secondary-admin: #2a5298;
+        --bg-color: #f4f7fa;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+    }
+
+    body {
+        background: var(--bg-color);
+        padding: 20px;
+        color: var(--text-main);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .container {
+        max-width: 1180px;
+        margin: auto;
+    }
+
+    .header-bar {
+        background: var(--card-bg);
+        padding: 20px 25px;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .header-bar h2 {
+        margin: 0;
+        color: var(--primary-admin);
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .btn-top {
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-back { background: #e2e8f0; color: #334155; }
+    .btn-print {
+        background: #059669;
+        color: #ffffff !important;
+        padding: 8px 16px;
+        font-weight: 700;
+        box-shadow: 0 3px 10px rgba(5, 150, 105, 0.25);
+    }
+    .btn-print:hover:not(:disabled) { background: #047857; }
+    .btn-print:disabled {
+        background: #cbd5e1;
+        color: #475569 !important;
+        cursor: not-allowed;
+        box-shadow: none;
+        opacity: 0.8;
+    }
+
+    .ledger-toolbar-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 14px;
+        padding: 10px 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+    }
+
+    .toolbar-btn-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .btn-toggle-rows {
+        background: #eff6ff;
+        color: var(--primary-admin);
+        border: 1px solid #bfdbfe;
+        padding: 7px 12px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .btn-toggle-rows:hover { background: #dbeafe; }
+
+    .flash-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 16px;
+    }
+
+    .flash-modal-overlay.is-open {
+        display: flex;
+    }
+
+    .flash-modal-box {
+        background: #ffffff;
+        border-radius: 16px;
+        max-width: 450px;
+        width: 100%;
+        padding: 26px 24px;
+        text-align: center;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+        border-top: 5px solid #10b981;
+    }
+
+    .flash-modal-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: #d1fae5;
+        color: #059669;
+        font-size: 26px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 14px;
+    }
+
+    .flash-modal-box h3 { margin: 0 0 8px; color: #0f172a; font-size: 18px; }
+    .flash-modal-box p { margin: 0 0 20px; color: #334155; font-size: 14px; line-height: 1.5; }
+    .btn-modal-ok {
+        background: #10b981;
+        color: #ffffff;
+        border: none;
+        padding: 10px 26px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .stats-wrapper {
+        background: var(--card-bg);
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px 22px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        margin-bottom: 20px;
+    }
+
+    .stats-filter-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .stats-filter-controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .batch-context-strip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 8px 14px;
+        margin-bottom: 16px;
+        font-size: 12.5px;
+        color: var(--text-muted);
+    }
+
+    .batch-pill-badge {
+        background: #eff6ff;
+        color: var(--primary-admin);
+        border: 1px solid #bfdbfe;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 11.5px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 14px;
+    }
+
+    .stat-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 15px 18px;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .stat-card-link:hover {
+        transform: translateY(-2px);
+        border-color: #93c5fd;
+        box-shadow: 0 8px 18px rgba(30, 60, 114, 0.08);
+    }
+
+    .stat-card-active {
+        border: 2px solid var(--primary-admin);
+        background: #f0f7ff;
+    }
+
+    .stat-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .stat-value { font-size: 23px; font-weight: 800; color: var(--primary-admin); }
+    .stat-paid { color: #059669; }
+    .stat-unpaid { color: #dc2626; }
+    .stat-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: block; }
+
+    .panel-card {
+        background: var(--card-bg);
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 22px 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        margin: 0 0 16px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--primary-admin);
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .search-bar-form {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .search-input, .form-control {
+        box-sizing: border-box;
+        padding: 9px 13px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 13px;
+        background: #ffffff;
+        color: var(--text-main);
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 240px;
+        font-size: 14px;
+    }
+
+    .btn-smart-search {
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
+        color: #ffffff !important;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        box-shadow: 0 3px 12px rgba(37, 99, 235, 0.32);
+        transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+        white-space: nowrap;
+        text-decoration: none;
+    }
+
+    .btn-smart-search:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.06);
+        box-shadow: 0 5px 16px rgba(79, 70, 229, 0.38);
+    }
+
+    .btn-clear-smart {
+        background: linear-gradient(135deg, #f43f5e, #e11d48);
+        color: #ffffff !important;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 3px 10px rgba(225, 29, 72, 0.28);
+        transition: transform 0.12s ease, filter 0.12s ease;
+        white-space: nowrap;
+    }
+
+    .btn-clear-smart:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.06);
+    }
+
+    .search-results-box {
+        margin-top: 16px;
+        border: 1px solid #bfdbfe;
+        background: #f8fafc;
+        border-radius: 10px;
+        overflow-x: auto;
+    }
+
+    .search-results-header {
+        background: #eff6ff;
+        padding: 10px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--primary-admin);
+        border-bottom: 1px solid #bfdbfe;
+    }
+
+    .btn-update-deposit {
+        background: #059669;
+        color: #ffffff !important;
+        border: none;
+        padding: 7px 14px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-update-deposit:hover { background: #047857; }
+
+    .deposit-panel {
+        display: none;
+        border: 2px solid #059669;
+        box-shadow: 0 8px 28px rgba(5, 150, 105, 0.14);
+    }
+
+    .btn-close-deposit {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .selected-student-banner {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        color: #065f46;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .cash-form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 14px;
+        align-items: end;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .btn-submit-cash {
+        background: #059669;
+        color: #ffffff !important;
+        border: none;
+        padding: 11px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .btn-submit-cash:hover { background: #047857; }
+
+    .btn-clear-unpaid {
+        background: #fff1f2;
+        color: #be123c;
+        border: 1px solid #fda4af;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .btn-clear-unpaid:hover {
+        background: #e11d48;
+        color: #ffffff !important;
+        border-color: #e11d48;
+    }
+
+    .ledger-table-wrap {
+        overflow-x: auto;
+    }
+
+    .ledger-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .ledger-table th {
+        background: #f8fafc;
+        color: var(--text-muted);
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 11px;
+        text-transform: uppercase;
+    }
+
+    .ledger-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    .phone-mask {
+        font-family: 'Consolas', 'Courier New', monospace;
+        letter-spacing: 0.4px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .gender-tag {
+        display: inline-block;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-size: 10.5px;
+        font-weight: 800;
+        margin-left: 4px;
+        vertical-align: middle;
+    }
+
+    .gender-m {
+        background: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #93c5fd;
+    }
+
+    .gender-f {
+        background: #fce7f3;
+        color: #9d174d;
+        border: 1px solid #f9a8d4;
+    }
+
+    .badge-paid {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-block;
+    }
+
+    .badge-unpaid {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-block;
+    }
+
+    .badge-upcoming {
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-block;
+    }
+
+    .badge-pre {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-block;
+    }
+
+    .grouped-months-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        align-items: center;
+    }
+
+    .m-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 7px;
+        border-radius: 5px;
+        font-size: 11px;
+        line-height: 1.2;
+        border: 1px solid #e2e8f0;
+        white-space: nowrap;
+    }
+
+    .m-pill-paid { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; font-weight: 600; }
+    .m-pill-unpaid { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .m-pill-upcoming { background: #f0f9ff; border-color: #bae6fd; color: #0369a1; }
+    .m-pill-pre { background: #f8fafc; border-color: #cbd5e1; color: #64748b; }
+
+    .btn-mini {
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .btn-profile { background: #eff6ff; color: var(--primary-admin); border: 1px solid #bfdbfe; }
+
+    .print-report-header {
+        display: none;
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #1e3c72;
+    }
+
+    /* Screen-only limit: hide rows beyond 10 unless .show-all-rows is active */
+    .ledger-table-wrap:not(.show-all-rows) tbody tr.ledger-extra-row {
+        display: none;
+    }
+
+    @media print {
+        @page { size: A4 portrait; margin: 6mm; }
+        body { background: #ffffff !important; padding: 0 !important; font-size: 10px !important; }
+        .container { max-width: 100% !important; width: 100% !important; }
+        .header-bar, .search-panel, .deposit-panel, .stats-wrapper, .flash-modal-overlay, .no-print, .no-print-controls {
+            display: none !important;
+        }
+        #ledgerSection {
+            box-shadow: none !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .print-report-header { display: block !important; }
+        .print-report-header h2 { font-size: 14px !important; }
+        .print-report-header p { font-size: 10px !important; }
+        .ledger-table {
+            width: 100% !important;
+            table-layout: auto !important;
+            border-collapse: collapse !important;
+        }
+        .ledger-table th, .ledger-table td {
+            padding: 4px 5px !important;
+            font-size: 9.2px !important;
+            line-height: 1.25 !important;
+            border-color: #cbd5e1 !important;
+            word-wrap: break-word !important;
+        }
+        .phone-mask {
+            font-size: 8.8px !important;
+            letter-spacing: 0.3px !important;
+            color: #0f172a !important;
+        }
+        .gender-tag {
+            padding: 0.5px 4px !important;
+            font-size: 8px !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .ledger-table code {
+            font-size: 8.5px !important;
+            word-break: break-all !important;
+        }
+        .ledger-table tr { break-inside: avoid; }
+        .ledger-table-wrap tbody tr.ledger-extra-row,
+        .ledger-table-wrap:not(.show-all-rows) tbody tr.ledger-extra-row {
+            display: table-row !important;
+        }
+        .grouped-months-strip { gap: 2px !important; }
+        .m-pill {
+            padding: 1.5px 4px !important;
+            font-size: 8.5px !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .badge-paid, .badge-unpaid, .badge-upcoming, .badge-pre {
+            padding: 1.5px 5px !important;
+            font-size: 8.5px !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- Confirmation Popup Modal -->
+    <div id="flashModal" class="flash-modal-overlay {% if flash_msg %}is-open{% endif %}">
+        <div class="flash-modal-box">
+            <div class="flash-modal-icon">✓</div>
+            <h3>Fee Ledger Updated</h3>
+            <p id="flashModalMessage">{{ flash_msg or '' }}</p>
+            <button type="button" class="btn-modal-ok" onclick="closeFlashModal()">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <!-- Top Header -->
+    <div class="header-bar">
+        <div>
+            <h2>💳 Fee Status & Ledgers — {{ stat_period_label }}</h2>
+            <small style="color: var(--text-muted);">KM Campus • Deposit Updates, Collection Overview & Student Lists</small>
+        </div>
+        <div class="header-actions no-print">
+            <a href="/admin/dashboard" class="btn-top btn-back">&larr; Dashboard</a>
+        </div>
+    </div>
+
+    <!-- 1. SEARCH STUDENT TO UPDATE FEE DEPOSIT -->
+    <div class="panel-card search-panel">
+        <h3 class="section-title">🔍 Search Student to Update Fee Deposit</h3>
+        <form method="GET" action="/admin/fees" class="search-bar-form">
+            <input type="hidden" name="stat_month" value="{{ stat_month }}">
+            <input type="hidden" name="stat_year" value="{{ stat_year }}">
+            <input type="hidden" name="month" value="{{ ledger_month_mode }}">
+            <input type="hidden" name="year" value="{{ selected_year }}">
+            <input type="hidden" name="status" value="{{ status_filter }}">
+            <input type="hidden" name="gender" value="{{ gender_filter }}">
+            {% if batch_filter %}
+                <input type="hidden" name="batch" value="{{ batch_filter }}">
+            {% endif %}
+            {% if class_filter %}
+                <input type="hidden" name="school_class" value="{{ class_filter }}">
+            {% endif %}
+            <input type="hidden" name="ledger_search" value="{{ '1' if ledger_searched else '0' }}">
+
+            <input type="text" name="q" value="{{ search_query or '' }}" class="search-input"
+                   placeholder="Search by Student Name, Father's Name, Username, Class, Phone, or Village..." required>
+
+            <button type="submit" class="btn-smart-search">🔍 Search Student</button>
+
+            {% if search_triggered %}
+                <a href="{{ url_for('admin_fee_ledger', stat_month=stat_month, stat_year=stat_year, month=ledger_month_mode, year=selected_year, batch=batch_filter, gender=gender_filter, school_class=class_filter, status=status_filter, ledger_search=(1 if ledger_searched else 0)) }}"
+                   class="btn-clear-smart">✕ Clear Search</a>
+            {% endif %}
+        </form>
+
+        {% if search_triggered %}
+        <div class="search-results-box">
+            <div class="search-results-header">
+                Search Results for "{{ search_query }}" ({{ searched_students | length }} found)
+            </div>
+
+            {% if searched_students %}
+            <table class="ledger-table">
+                <thead>
+                    <tr>
+                        <th>Student Details</th>
+                        <th>Batch & Class</th>
+                        <th>Village / Contact</th>
+                        <th>{{ current_month_name }} {{ current_year }} Status</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for st in searched_students %}
+                    <tr>
+                        <td>
+                            <strong>{{ st.name }}</strong>
+                            {% if st.gender_short %}
+                                <span class="gender-tag {% if st.gender_short == 'M' %}gender-m{% else %}gender-f{% endif %}">{{ st.gender_short }}</span>
+                            {% endif %}<br>
+                            <small style="color: var(--text-muted);">S/o {{ st.father_name or 'N/A' }} • @{{ st.username }}</small>
+                        </td>
+                        <td>
+                            <span class="badge-pre" style="margin-bottom: 3px;">Batch: {{ st.batch or 'Morning' }}</span><br>
+                            <span class="badge-pre">Class: {{ st.school_class or 'N/A' }}</span>
+                        </td>
+                        <td>
+                            {{ st.village or 'N/A' }}<br>
+                            <small style="color: var(--text-muted);">
+                                <span class="phone-mask">
+                                    {% if st.gender_short == 'M' %}
+                                        {{ st.phone or 'N/A' }}
+                                    {% else %}
+                                        {{ (st.phone[:1] ~ '*******' ~ st.phone[-2:]) if (st.phone and st.phone | length >= 3 and '*' not in st.phone) else (st.phone or 'Masked') }}
+                                    {% endif %}
+                                </span>
+                            </small>
+                        </td>
+                        <td>
+                            {% if st.fee_status == 'Paid' %}
+                                <span class="badge-paid">Paid ₹{{ st.amount_paid }}</span>
+                            {% else %}
+                                <span class="badge-unpaid">Unpaid</span>
+                            {% endif %}
+                            {% if st.updated_by %}
+                                <br><small style="color: var(--text-muted);">By: {{ st.updated_by }}</small>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <button type="button" class="btn-update-deposit"
+                                    onclick="openDepositForm({{ st.student_id }}, '{{ st.name | replace("'", "\\'") }}', '{{ current_month_name }}', '{{ current_year }}', '{{ st.amount_paid or "" }}', '{{ st.payment_mode or "Cash" }}')">
+                                💵 Update Deposit
+                            </button>
+                            <a href="/admin-student-profile/{{ st.student_id }}" target="_blank" class="btn-mini btn-profile">
+                                👁️ Dossier
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="padding: 16px; margin: 0; font-size: 13px; color: var(--text-muted);">
+                No active student found matching "{{ search_query }}".
+            </p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 2. UPDATE / RECORD STUDENT DEPOSIT -->
+    <div id="depositPanel" class="panel-card deposit-panel">
+        <div class="section-title">
+            <span>💵 Update / Record Student Deposit</span>
+            <button type="button" class="btn-close-deposit" onclick="closeDepositForm()">✕ Close</button>
+        </div>
+
+        <div id="selectedStudentBanner" class="selected-student-banner">
+            <span id="selectedStudentText">Updating deposit for student</span>
+            <span style="font-size: 11px; text-transform: uppercase;">Select year, month, amount & paid method</span>
+        </div>
+
+        <form id="depositForm" method="POST" action="/admin/fees" class="cash-form-grid">
+            <input type="hidden" id="action_type" name="action_type" value="save">
+            <input type="hidden" name="search_q" value="{{ search_query or '' }}">
+            <input type="hidden" name="stat_month" value="{{ stat_month }}">
+            <input type="hidden" name="stat_year" value="{{ stat_year }}">
+            <input type="hidden" name="ledger_month" value="{{ ledger_month_mode }}">
+            <input type="hidden" name="ledger_year" value="{{ selected_year }}">
+            <input type="hidden" name="ledger_status" value="{{ status_filter }}">
+            <input type="hidden" name="ledger_batch" value="{{ batch_filter }}">
+            <input type="hidden" name="ledger_gender" value="{{ gender_filter }}">
+            <input type="hidden" name="ledger_class" value="{{ class_filter }}">
+            <input type="hidden" name="ledger_searched" value="{{ '1' if ledger_searched else '0' }}">
+            <input type="hidden" id="student_id" name="student_id" required>
+
+            <div class="form-group">
+                <label for="bill_year">Year</label>
+                <select id="bill_year" name="bill_year" class="form-control" required>
+                    {% for yr in year_options %}
+                    <option value="{{ yr }}" {% if yr == current_year %}selected{% endif %}>{{ yr }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="bill_month">Month</label>
+                <select id="bill_month" name="bill_month" class="form-control" required>
+                    {% for mo in month_options %}
+                    <option value="{{ mo }}" {% if mo == current_month_name %}selected{% endif %}>{{ mo }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="amount">Deposit Amount (₹)</label>
+                <input type="number" id="amount" name="amount" class="form-control" min="1" step="0.01" placeholder="e.g., 300 or 500" required>
+            </div>
+
+            <div class="form-group">
+                <label for="payment_date">Deposit Date</label>
+                <input type="date" id="payment_date" name="payment_date" class="form-control" value="{{ today_date }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="payment_mode">Paid Method</label>
+                <select id="payment_mode" name="payment_mode" class="form-control" onchange="toggleOtherMethod(this.value)" required>
+                    <option value="Cash" selected>Cash</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="text" id="custom_payment_mode" name="custom_payment_mode" class="form-control"
+                       style="display: none; margin-top: 8px;"
+                       placeholder="e.g., Bank transfer or compensation for duty done">
+            </div>
+
+            <div class="form-group">
+                <label for="receipt_no">Receipt No (Optional)</label>
+                <input type="text" id="receipt_no" name="receipt_no" class="form-control" placeholder="Auto-generated if blank">
+            </div>
+
+            <div class="form-group">
+                <button type="button" class="btn-submit-cash" onclick="handleSaveDepositClick()">✓ Update Deposit</button>
+            </div>
+
+            <div class="form-group">
+                <button type="button" class="btn-clear-unpaid" onclick="clearPaymentToNotPaid()">
+                    Mark Not Paid
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 3. COLLECTION OVERVIEW -->
+    <div class="stats-wrapper">
+        <form id="overviewForm" method="GET" action="/admin/fees" class="stats-filter-bar">
+            <input type="hidden" name="status" value="{{ status_filter }}">
+            <input type="hidden" name="ledger_search" value="{{ '1' if ledger_searched else '0' }}">
+            {% if search_query %}
+                <input type="hidden" name="q" value="{{ search_query }}">
+            {% endif %}
+
+            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <strong style="font-size: 14px; color: var(--primary-admin);">
+                    📊 Collection Overview — {{ stat_period_label }}
+                </strong>
+                <div style="display: inline-flex; gap: 6px; flex-wrap: wrap;">
+                    <button type="button" class="btn-mini btn-profile"
+                            onclick="quickSummaryPreset('{{ current_month_name }}', '{{ current_year }}')">
+                        This Month
+                    </button>
+                    <button type="button" class="btn-mini btn-profile"
+                            onclick="quickSummaryPreset('Whole Year', '{{ current_year }}')">
+                        Whole {{ current_year }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-filter-controls">
+                <select id="statMonthSelect" name="stat_month" class="form-control"
+                        aria-label="Collection Summary Month or Whole Year" onchange="syncAndSubmitOverview()">
+                    <option value="Whole Year" {% if stat_month == 'Whole Year' %}selected{% endif %}>
+                        📅 Whole Year (All 12 Months)
+                    </option>
+                    {% for mo in month_options %}
+                    <option value="{{ mo }}" {% if mo == stat_month %}selected{% endif %}>{{ mo }}</option>
+                    {% endfor %}
+                </select>
+
+                <select id="statYearSelect" name="stat_year" class="form-control"
+                        aria-label="Collection Summary Year" onchange="syncAndSubmitOverview()">
+                    {% for yr in year_options %}
+                    <option value="{{ yr }}" {% if yr == stat_year %}selected{% endif %}>{{ yr }}</option>
+                    {% endfor %}
+                </select>
+
+                <select id="statBatchSelect" name="batch" class="form-control"
+                        aria-label="Select Batch" onchange="this.form.submit()">
+                    <option value="" {% if not batch_filter %}selected{% endif %}>All Batches</option>
+                    {% for b in batch_options %}
+                    <option value="{{ b }}" {% if b == batch_filter %}selected{% endif %}>Batch: {{ b }}</option>
+                    {% endfor %}
+                </select>
+
+                <select id="statGenderSelect" name="gender" class="form-control"
+                        aria-label="Select Gender" onchange="this.form.submit()">
+                    <option value="Both" {% if gender_filter == 'Both' %}selected{% endif %}>Gender: Both</option>
+                    <option value="Male" {% if gender_filter == 'Male' %}selected{% endif %}>Gender: Male (M)</option>
+                    <option value="Female" {% if gender_filter == 'Female' %}selected{% endif %}>Gender: Female (F)</option>
+                </select>
+
+                <select id="statClassSelect" name="school_class" class="form-control"
+                        aria-label="Select Class" onchange="this.form.submit()">
+                    <option value="" {% if not class_filter %}selected{% endif %}>All Classes</option>
+                    {% for sc in class_options %}
+                    <option value="{{ sc }}" {% if sc == class_filter %}selected{% endif %}>Class: {{ sc }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="btn-smart-search" style="padding: 8px 14px; font-size: 12px;">
+                    Apply
+                </button>
+            </div>
+        </form>
+
+        <!-- Filter Context Strip -->
+        <div class="batch-context-strip">
+            <div>
+                Overview Period: <strong>{{ stat_period_label }}</strong>
+                {% if ledger_searched %}
+                    • Active List: <strong>
+                        {% if status_filter == 'Paid' %}Paid Students List
+                        {% elif status_filter == 'Unpaid' %}Not Paid Students List
+                        {% else %}All Students List
+                        {% endif %}
+                    </strong>
+                {% else %}
+                    • Click <strong>Paid Students</strong>, <strong>Not Paid</strong>, or <strong>All Students</strong> below to view a list
+                {% endif %}
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <span class="batch-pill-badge">Batch: {{ batch_filter or 'All Batches' }}</span>
+                <span class="batch-pill-badge">Gender: {{ gender_filter }}</span>
+                <span class="batch-pill-badge">Class: {{ class_filter or 'All Classes' }}</span>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <!-- Card 1: Collected -->
+            <div class="stat-card">
+                <span class="stat-label">Collected ({{ stat_period_label }})</span>
+                <span class="stat-value stat-paid">₹{{ "%.0f"|format(total_collected) }}</span>
+                <span class="stat-hint">{{ batch_filter or 'All Batches' }} • {{ gender_filter }}</span>
+            </div>
+
+            <!-- Card 2: Paid Students -->
+            <a href="{{ url_for('admin_fee_ledger', stat_month=stat_month, stat_year=stat_year, month=stat_month, year=stat_year, batch=batch_filter, gender=gender_filter, school_class=class_filter, status='Paid', ledger_search=1, q=search_query) }}"
+               class="stat-card stat-card-link {% if ledger_searched and status_filter == 'Paid' %}stat-card-active{% endif %}">
+                <span class="stat-label">Paid Students</span>
+                <span class="stat-value stat-paid">{{ paid_count }}</span>
+                <span class="stat-hint">Click to view Paid Students List</span>
+            </a>
+
+            <!-- Card 3: Not Paid -->
+            <a href="{{ url_for('admin_fee_ledger', stat_month=stat_month, stat_year=stat_year, month=stat_month, year=stat_year, batch=batch_filter, gender=gender_filter, school_class=class_filter, status='Unpaid', ledger_search=1, q=search_query) }}"
+               class="stat-card stat-card-link {% if ledger_searched and status_filter == 'Unpaid' %}stat-card-active{% endif %}">
+                <span class="stat-label">Not Paid</span>
+                <span class="stat-value stat-unpaid">{{ unpaid_count }}</span>
+                <span class="stat-hint">Click to view Not Paid List</span>
+            </a>
+
+            <!-- Card 4: All Students -->
+            <a href="{{ url_for('admin_fee_ledger', stat_month=stat_month, stat_year=stat_year, month=stat_month, year=stat_year, batch=batch_filter, gender=gender_filter, school_class=class_filter, status='All', ledger_search=1, q=search_query) }}"
+               class="stat-card stat-card-link {% if ledger_searched and status_filter == 'All' %}stat-card-active{% endif %}">
+                <span class="stat-label">All Students</span>
+                <span class="stat-value" style="color: #1e3c72;">{{ total_students }}</span>
+                <span class="stat-hint">{{ batch_filter or 'All Batches' }} • Click to view All Students List</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 4. STUDENT LIST BOX -->
+    {% if ledger_searched %}
+    <div id="ledgerSection" class="panel-card">
+
+        <!-- Printable Header -->
+        <div class="print-report-header">
+            <h2 style="margin: 0; color: #1e3c72;">KM Campus — Fee Ledger Report</h2>
+            <p style="margin: 3px 0 0; font-size: 12px; color: #334155;">
+                <strong>Period:</strong> {{ stat_period_label }} &nbsp;|&nbsp;
+                <strong>Batch:</strong> {{ batch_filter or 'All Batches' }} &nbsp;|&nbsp;
+                <strong>Gender:</strong> {{ gender_filter }} &nbsp;|&nbsp;
+                <strong>Class:</strong> {{ class_filter or 'All Classes' }} &nbsp;|&nbsp;
+                <strong>List View:</strong>
+                {% if status_filter == 'Paid' %}Paid Students List
+                {% elif status_filter == 'Unpaid' %}Not Paid Students List
+                {% else %}All Students List
+                {% endif %} &nbsp;|&nbsp;
+                <strong>Total Collected:</strong> ₹{{ "%.0f"|format(ledger_total_collected) }}
+            </p>
+        </div>
+
+        <h3 class="section-title">
+            <span>
+                {% if status_filter == 'Paid' %}✅ Paid Students List
+                {% elif status_filter == 'Unpaid' %}⚠️ Not Paid Students List
+                {% else %}👥 All Students List
+                {% endif %}
+                ({{ rows | length }} total)
+            </span>
+        </h3>
+
+        <div style="font-size: 12.5px; color: #059669; font-weight: 700; margin-bottom: 10px;">
+            {{ stat_period_label }} • {{ batch_filter or 'All Batches' }} • Gender: {{ gender_filter }} • Class: {{ class_filter or 'All Classes' }} • Collected: ₹{{ "%.0f"|format(ledger_total_collected) }}
+        </div>
+
+        <div class="ledger-toolbar-row no-print">
+            <span id="ledgerRowCounter" style="font-size: 12px; color: var(--text-muted);">
+                Showing {{ [rows | length, 10] | min }} of {{ rows | length }} on screen • Full {{ rows | length }} print automatically
+            </span>
+            <div class="toolbar-btn-group no-print-controls">
+                {% if rows | length > 10 %}
+                <button type="button" id="toggleAllRowsBtn" class="btn-toggle-rows" onclick="toggleAllLedgerRows()">
+                    Show All {{ rows | length }} Rows
+                </button>
+                {% endif %}
+                <button type="button" class="btn-top btn-print" onclick="window.print()">
+                    🖨️ Print Full Ledger ({{ rows | length }})
+                </button>
+            </div>
+        </div>
+
+        {% if ledger_month_mode == 'Whole Year' %}
+        <div id="ledgerTableWrap" class="ledger-table-wrap">
+            <table class="ledger-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Batch & Class</th>
+                        <th>Year Total ({{ selected_year }})</th>
+                        <th>12-Month Status (Jan – Dec {{ selected_year }})</th>
+                        <th class="no-print" style="text-align: right;">Dossier</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in rows %}
+                    <tr class="{% if loop.index > 10 %}ledger-extra-row{% endif %}">
+                        <td>
+                            <strong>{{ r.name }}</strong>
+                            {% if r.gender_short %}
+                                <span class="gender-tag {% if r.gender_short == 'M' %}gender-m{% else %}gender-f{% endif %}">{{ r.gender_short }}</span>
+                            {% endif %}<br>
+                            <small style="color: var(--text-muted);">
+                                @{{ r.username }} •
+                                <span class="phone-mask">
+                                    {% if r.gender_short == 'M' %}
+                                        {{ r.phone or 'N/A' }}
+                                    {% else %}
+                                        {{ (r.phone[:1] ~ '*******' ~ r.phone[-2:]) if (r.phone and r.phone | length >= 3 and '*' not in r.phone) else (r.phone or 'Masked') }}
+                                    {% endif %}
+                                </span>
+                            </small>
+                        </td>
+                        <td>
+                            <span class="badge-pre" style="margin-bottom: 2px;">{{ r.batch or 'Morning' }}</span><br>
+                            <small style="color: var(--text-muted);">{{ r.school_class or 'N/A' }}</small>
+                        </td>
+                        <td style="white-space: nowrap;">
+                            <strong style="color: #059669; font-size: 14px;">₹{{ "%.0f"|format(r.year_total) }}</strong><br>
+                            <span class="{% if r.unpaid_months_count > 0 %}badge-unpaid{% else %}badge-paid{% endif %}" style="margin-top: 3px;">
+                                {{ r.overall_badge }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="grouped-months-strip">
+                                {% for m in r.monthly_breakdown %}
+                                <span class="m-pill
+                                    {% if m.code == 'Paid' %}m-pill-paid
+                                    {% elif m.code == 'Unpaid' %}m-pill-unpaid
+                                    {% elif m.code == 'Upcoming' %}m-pill-upcoming
+                                    {% else %}m-pill-pre{% endif %}"
+                                    title="{{ m.month }} {{ selected_year }}: {{ m.label }}">
+                                    <strong>{{ m.short }}:</strong> {{ m.short_label }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td class="no-print" style="text-align: right; white-space: nowrap;">
+                            <a href="/admin-student-profile/{{ r.student_id }}" target="_blank" class="btn-mini btn-profile">
+                                👁️ Dossier
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                            No student records match the selected period, batch, gender, class, and filter.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div id="ledgerTableWrap" class="ledger-table-wrap">
+            <table class="ledger-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Batch & Class</th>
+                        <th>{{ stat_period_label }} Status</th>
+                        <th>Amount Paid</th>
+                        <th>Deposit Date</th>
+                        <th>Receipt / Mode</th>
+                        <th class="no-print" style="text-align: right;">Dossier</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in rows %}
+                    <tr class="{% if loop.index > 10 %}ledger-extra-row{% endif %}">
+                        <td>
+                            <strong>{{ r.name }}</strong>
+                            {% if r.gender_short %}
+                                <span class="gender-tag {% if r.gender_short == 'M' %}gender-m{% else %}gender-f{% endif %}">{{ r.gender_short }}</span>
+                            {% endif %}<br>
+                            <small style="color: var(--text-muted);">
+                                @{{ r.username }} •
+                                <span class="phone-mask">
+                                    {% if r.gender_short == 'M' %}
+                                        {{ r.phone or 'N/A' }}
+                                    {% else %}
+                                        {{ (r.phone[:1] ~ '*******' ~ r.phone[-2:]) if (r.phone and r.phone | length >= 3 and '*' not in r.phone) else (r.phone or 'Masked') }}
+                                    {% endif %}
+                                </span>
+                            </small>
+                        </td>
+                        <td>
+                            <span class="badge-pre" style="margin-bottom: 2px;">{{ r.batch or 'Morning' }}</span><br>
+                            <small style="color: var(--text-muted);">{{ r.school_class or 'N/A' }}</small>
+                        </td>
+                        <td>
+                            {% if r.month_status_code == 'Paid' %}
+                                <span class="badge-paid">{{ r.month_status_label }}</span>
+                            {% elif r.month_status_code == 'Upcoming' %}
+                                <span class="badge-upcoming">{{ r.month_status_label }}</span>
+                            {% elif r.month_status_code == 'BeforeFirstFee' %}
+                                <span class="badge-pre">{{ r.month_status_label }}</span>
+                            {% else %}
+                                <span class="badge-unpaid">{{ r.month_status_label }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if r.month_status_code == 'Paid' %}
+                                <strong style="color: #059669;">₹{{ r.amount_paid }}</strong>
+                            {% else %}
+                                <span style="color: var(--text-muted);">—</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ r.payment_date or '—' }}</td>
+                        <td>
+                            {% if r.receipt_no %}
+                                <code>{{ r.receipt_no }}</code> <small style="color: var(--text-muted);">({{ r.payment_mode }})</small>
+                            {% else %}
+                                <span style="color: var(--text-muted);">—</span>
+                            {% endif %}
+                            {% if r.updated_by %}
+                                <br><small style="color: var(--text-muted);">By: {{ r.updated_by }}</small>
+                            {% endif %}
+                        </td>
+                        <td class="no-print" style="text-align: right; white-space: nowrap;">
+                            <a href="/admin-student-profile/{{ r.student_id }}" target="_blank" class="btn-mini btn-profile">
+                                👁️ Dossier
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                            No student records match the selected period, batch, gender, class, and filter.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+    const TOTAL_LEDGER_ROWS = {{ rows | length if rows else 0 }};
+
+    function showFlashPopup(msg) {
+        const overlay = document.getElementById('flashModal');
+        const msgEl = document.getElementById('flashModalMessage');
+        if (msgEl && msg) {
+            msgEl.textContent = msg;
+        }
+        if (overlay) {
+            overlay.classList.add('is-open');
+            overlay.style.display = 'flex';
+        }
+    }
+
+    function closeFlashModal() {
+        const overlay = document.getElementById('flashModal');
+        if (overlay) {
+            overlay.classList.remove('is-open');
+            overlay.style.display = 'none';
+        }
+    }
+
+    function toggleOtherMethod(selectedVal) {
+        const customInput = document.getElementById('custom_payment_mode');
+        if (!customInput) return;
+        if (selectedVal === 'Other') {
+            customInput.style.display = 'block';
+            customInput.required = true;
+            customInput.focus();
+        } else {
+            customInput.style.display = 'none';
+            customInput.required = false;
+            customInput.value = '';
+        }
+    }
+
+    function setFormMode(mode) {
+        const actionInput = document.getElementById('action_type');
+        const amountInput = document.getElementById('amount');
+        if (actionInput) actionInput.value = mode;
+        if (amountInput) amountInput.required = (mode === 'save');
+    }
+
+    async function submitDepositSamePage() {
+        const form = document.getElementById('depositForm');
+        if (!form) return;
+
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+        for (const [k, v] of formData.entries()) {
+            params.append(k, v);
+        }
+
+        try {
+            const resp = await fetch(form.getAttribute('action') || '/admin/fees', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            });
+            const data = await resp.json().catch(() => null);
+            if (resp.ok && data && data.ok) {
+                showFlashPopup(data.message || 'Fee deposit updated successfully.');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 700);
+            } else {
+                showFlashPopup((data && data.message) || 'Could not update deposit.');
+            }
+        } catch (err) {
+            showFlashPopup('Network error while updating deposit.');
+        }
+    }
+
+    function handleSaveDepositClick() {
+        const amountInput = document.getElementById('amount');
+        const modeSelect = document.getElementById('payment_mode');
+        const customInput = document.getElementById('custom_payment_mode');
+
+        setFormMode('save');
+        if (amountInput && (!amountInput.value || Number(amountInput.value) <= 0)) {
+            showFlashPopup('Please enter a valid deposit amount greater than 0.');
+            amountInput.focus();
+            return;
+        }
+        if (modeSelect && modeSelect.value === 'Other' && customInput && !customInput.value.trim()) {
+            showFlashPopup('Please specify the payment method for Other.');
+            customInput.focus();
+            return;
+        }
+        submitDepositSamePage();
+    }
+
+    function clearPaymentToNotPaid() {
+        const studentNameText = document.getElementById('selectedStudentText')?.textContent || 'this student';
+        const monthVal = document.getElementById('bill_month')?.value || '';
+        const yearVal = document.getElementById('bill_year')?.value || '';
+
+        if (!confirm(`Clear payment and mark ${studentNameText} as Not Paid for ${monthVal} ${yearVal}?`)) {
+            return;
+        }
+        setFormMode('clear_unpaid');
+        submitDepositSamePage();
+    }
+
+    function openDepositForm(studentId, studentName, defaultMonth, defaultYear, existingAmount, existingMode) {
+        const panel = document.getElementById('depositPanel');
+        const bannerText = document.getElementById('selectedStudentText');
+        const studentInput = document.getElementById('student_id');
+        const monthSelect = document.getElementById('bill_month');
+        const yearSelect = document.getElementById('bill_year');
+        const amountInput = document.getElementById('amount');
+        const modeSelect = document.getElementById('payment_mode');
+        const customInput = document.getElementById('custom_payment_mode');
+
+        setFormMode('save');
+
+        if (studentInput) studentInput.value = studentId;
+        if (monthSelect && defaultMonth) monthSelect.value = defaultMonth;
+        if (yearSelect && defaultYear) yearSelect.value = defaultYear;
+        if (amountInput) amountInput.value = existingAmount || '';
+
+        if (modeSelect) {
+            if (existingMode === 'Cash' || existingMode === 'UPI' || !existingMode) {
+                modeSelect.value = existingMode || 'Cash';
+                toggleOtherMethod(modeSelect.value);
+            } else {
+                modeSelect.value = 'Other';
+                toggleOtherMethod('Other');
+                if (customInput) customInput.value = existingMode;
+            }
+        }
+
+        if (bannerText) {
+            bannerText.textContent = "Updating Deposit for: " + studentName + " (ID #" + studentId + ")";
+        }
+
+        if (panel) {
+            panel.style.display = "block";
+            panel.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+
+        if (amountInput) {
+            amountInput.focus();
+        }
+    }
+
+    function closeDepositForm() {
+        const panel = document.getElementById('depositPanel');
+        if (panel) panel.style.display = "none";
+    }
+
+    function syncAndSubmitOverview() {
+        const form = document.getElementById('overviewForm');
+        if (form) form.submit();
+    }
+
+    function quickSummaryPreset(monthOrWholeYear, yearVal) {
+        const monthSel = document.getElementById('statMonthSelect');
+        const yearSel = document.getElementById('statYearSelect');
+        if (monthSel && yearSel) {
+            monthSel.value = monthOrWholeYear;
+            yearSel.value = yearVal;
+            syncAndSubmitOverview();
+        }
+    }
+
+    function toggleAllLedgerRows() {
+        const wrap = document.getElementById('ledgerTableWrap');
+        const btn = document.getElementById('toggleAllRowsBtn');
+        const counter = document.getElementById('ledgerRowCounter');
+        if (!wrap) return;
+
+        const expanded = wrap.classList.toggle('show-all-rows');
+        if (btn) {
+            btn.textContent = expanded ? 'Show First 10 Rows' : `Show All ${TOTAL_LEDGER_ROWS} Rows`;
+        }
+        if (counter) {
+            const shownCount = expanded ? TOTAL_LEDGER_ROWS : Math.min(TOTAL_LEDGER_ROWS, 10);
+            counter.textContent = `Showing ${shownCount} of ${TOTAL_LEDGER_ROWS} on screen • Full ${TOTAL_LEDGER_ROWS} print automatically`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const depositForm = document.getElementById('depositForm');
+        if (depositForm) {
+            depositForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleSaveDepositClick();
+            });
+        }
+    });
+</script>
+{% endblock %}

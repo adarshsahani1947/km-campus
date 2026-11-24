@@ -1,0 +1,423 @@
+{% extends "common/base.html" %}
+
+{% block title %}Active & Deactive Students - KM Campus{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-admin: #1e3c72;
+        --secondary-admin: #2a5298;
+        --bg-color: #f4f7fa;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+    }
+
+    body {
+        background: var(--bg-color);
+        padding: 20px;
+        color: var(--text-main);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .container { max-width: 1220px; margin: auto; }
+
+    .header-bar {
+        background: var(--card-bg);
+        padding: 20px 25px;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .header-bar h2 { margin: 0; color: var(--primary-admin); font-size: 20px; font-weight: 700; }
+
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    .btn-top {
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-register-top { background: #059669; color: #ffffff !important; }
+    .btn-back { background: #e2e8f0; color: #334155; }
+    .btn-fees-link { background: #eff6ff; color: var(--primary-admin); border: 1px solid #bfdbfe; }
+
+    .flash-banner {
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .flash-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+    .flash-error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .stat-box {
+        background: var(--card-bg);
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 16px 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+    .stat-num { font-size: 26px; font-weight: 800; margin: 6px 0 2px; }
+    .stat-num.active-c { color: #059669; }
+    .stat-num.inactive-c { color: #dc2626; }
+    .stat-num.total-c { color: var(--primary-admin); }
+    .stat-sub { font-size: 12px; color: var(--text-muted); }
+
+    .panel-card {
+        background: var(--card-bg);
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+        margin-bottom: 20px;
+    }
+
+    .roster-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .roster-toolbar h3 { margin: 0; font-size: 16px; color: var(--primary-admin); }
+
+    .tab-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .tab-pill {
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 700;
+        text-decoration: none;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #334155;
+    }
+
+    .tab-pill.active {
+        background: var(--primary-admin);
+        color: #ffffff;
+        border-color: var(--primary-admin);
+    }
+
+    .filter-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+
+    .form-control {
+        box-sizing: border-box;
+        padding: 9px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 13px;
+        background: #ffffff;
+        color: var(--text-main);
+    }
+
+    .btn-filter {
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
+        color: #ffffff !important;
+        border: none;
+        padding: 9px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-reset {
+        background: #f1f5f9;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        padding: 9px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+        text-align: left;
+        padding: 10px 12px;
+        background: #f8fafc;
+        color: var(--text-muted);
+        font-size: 11px;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+    .badge-batch {
+        display: inline-block;
+        background: #e0f2fe;
+        color: #0369a1;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+    }
+
+    .badge-active {
+        display: inline-block;
+        background: #d1fae5;
+        color: #065f46;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 999px;
+    }
+
+    .badge-inactive {
+        display: inline-block;
+        background: #fee2e2;
+        color: #991b1b;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 999px;
+    }
+
+    .action-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+    .btn-sm {
+        padding: 5px 10px;
+        border-radius: 7px;
+        font-size: 11.5px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-dossier { background: #eff6ff; color: var(--primary-admin); border: 1px solid #bfdbfe; }
+    .btn-deactivate { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .btn-activate { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .btn-att-p { background: #0284c7; color: #ffffff !important; }
+    .btn-att-a { background: #f43f5e; color: #ffffff !important; }
+    .btn-att-l { background: #d97706; color: #ffffff !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    {% if flash_msg %}
+    <div class="flash-banner {% if flash_status == 'error' %}flash-error{% else %}flash-success{% endif %}">
+        <span>{{ '✕' if flash_status == 'error' else '✓' }} {{ flash_msg }}</span>
+        <button type="button" onclick="this.parentElement.style.display='none'" style="background:none;border:none;font-weight:800;cursor:pointer;">✕</button>
+    </div>
+    {% endif %}
+
+    <div class="header-bar">
+        <div>
+            <h2>👥 Active & Deactive Students</h2>
+            <small style="color: var(--text-muted);">
+                KM Campus • Status & Attendance Maintenance • Date: {{ att_date }}
+            </small>
+        </div>
+        <div class="header-actions">
+            <a href="/admin/register-or-edit" class="btn-top btn-register-top">+ Register New Student</a>
+            <a href="/admin/fees" class="btn-top btn-fees-link">💳 Fee Ledger</a>
+            <a href="/admin/dashboard" class="btn-top btn-back">&larr; Dashboard</a>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <a href="/admin/students?tab=Active{% if batch_filter %}&batch={{ batch_filter | urlencode }}{% endif %}" class="stat-box">
+            <div class="stat-label">Active Students</div>
+            <div class="stat-num active-c">{{ active_count }}</div>
+            <div class="stat-sub">Currently studying • Click to filter</div>
+        </a>
+        <a href="/admin/students?tab=Inactive{% if batch_filter %}&batch={{ batch_filter | urlencode }}{% endif %}" class="stat-box">
+            <div class="stat-label">Deactivated / Left</div>
+            <div class="stat-num inactive-c">{{ inactive_count }}</div>
+            <div class="stat-sub">Left institution • Click to filter</div>
+        </a>
+        <a href="/admin/students?tab=All{% if batch_filter %}&batch={{ batch_filter | urlencode }}{% endif %}" class="stat-box">
+            <div class="stat-label">Total Roster</div>
+            <div class="stat-num total-c">{{ total_count }}</div>
+            <div class="stat-sub">Present: {{ present_today_count }} • Absent: {{ absent_today_count }} ({{ att_date }})</div>
+        </a>
+    </div>
+
+    <div class="panel-card">
+        <div class="roster-toolbar">
+            <h3>📋 Student Roster ({{ students|length }} shown)</h3>
+            <div class="tab-pills">
+                <a href="/admin/students?tab=All{% if batch_filter %}&batch={{ batch_filter | urlencode }}{% endif %}&att_date={{ att_date }}{% if search_q %}&q={{ search_q | urlencode }}{% endif %}"
+                   class="tab-pill {% if tab_filter == 'All' %}active{% endif %}">All</a>
+                <a href="/admin/students?tab=Active{% if batch_filter %}&batch={{ batch_filter | urlencode }}{% endif %}&att_date={{ att_date }}{% if search_q %}&q={{ search_q | urlencode }}{% endif %}"
+                   class="tab-pill {% if tab_filter == 'Active' %}active{% endif %}">Active</a>
+                <a href="/admin/students?tab=Inactive{% if batch_filter %}&batch={{ batch_filter | urlencode }}{% endif %}&att_date={{ att_date }}{% if search_q %}&q={{ search_q | urlencode }}{% endif %}"
+                   class="tab-pill {% if tab_filter == 'Inactive' %}active{% endif %}">Deactivated / Left</a>
+            </div>
+        </div>
+
+        <form method="GET" action="/admin/students" class="filter-form">
+            <input type="hidden" name="tab" value="{{ tab_filter }}">
+            <input type="text" name="q" value="{{ search_q }}" class="form-control" style="flex:1;min-width:220px;"
+                   placeholder="Search name, father, phone, village, class...">
+            <select name="batch" class="form-control" aria-label="Filter by Batch">
+                <option value="">All Batches</option>
+                {% for b in batch_options %}
+                <option value="{{ b }}" {% if batch_filter == b %}selected{% endif %}>{{ b }}</option>
+                {% endfor %}
+            </select>
+            <input type="date" name="att_date" value="{{ att_date }}" class="form-control" aria-label="Attendance Date">
+            <button type="submit" class="btn-filter">🔍 Filter</button>
+            <a href="/admin/students" class="btn-reset">Reset</a>
+        </form>
+
+        {% if students %}
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Batch & Class</th>
+                        <th>Contact / Village</th>
+                        <th>Status & Attendance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for st in students %}
+                    <tr>
+                        <td>
+                            <strong>{{ st.name }}</strong><br>
+                            <small style="color: var(--text-muted);">
+                                S/o {{ st.father_name or 'N/A' }} • @{{ st.username }}
+                                {% if st.gender %} • {{ st.gender }}{% endif %}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="badge-batch">{{ st.batch or 'Morning Batch' }}</span><br>
+                            <small style="color: var(--text-muted);">Class: {{ st.school_class or 'N/A' }}</small>
+                        </td>
+                        <td>
+                            <strong>{{ st.phone or 'N/A' }}</strong><br>
+                            <small style="color: var(--text-muted);">{{ st.village or 'N/A' }}</small>
+                        </td>
+                        <td>
+                            {% if st.status == 'Inactive' %}
+                                <span class="badge-inactive">Deactivated</span>
+                                {% if st.deactivated_at %}<br><small style="color: var(--text-muted);">Left: {{ st.deactivated_at }}</small>{% endif %}
+                            {% else %}
+                                <span class="badge-active">Active</span>
+                            {% endif %}
+                            <br>
+                            <small style="color: var(--text-muted);">{{ att_date }}: <strong>{{ st.att_status }}</strong></small>
+                        </td>
+                        <td>
+                            <div class="action-group">
+                                <form method="POST" action="/admin/students" style="display:inline;">
+                                    <input type="hidden" name="action" value="mark_attendance">
+                                    <input type="hidden" name="student_id" value="{{ st.id }}">
+                                    <input type="hidden" name="att_status" value="Present">
+                                    <input type="hidden" name="att_date" value="{{ att_date }}">
+                                    <input type="hidden" name="tab" value="{{ tab_filter }}">
+                                    <input type="hidden" name="batch" value="{{ batch_filter }}">
+                                    <input type="hidden" name="q" value="{{ search_q }}">
+                                    <button type="submit" class="btn-sm btn-att-p" title="Mark Present">P</button>
+                                </form>
+
+                                <form method="POST" action="/admin/students" style="display:inline;">
+                                    <input type="hidden" name="action" value="mark_attendance">
+                                    <input type="hidden" name="student_id" value="{{ st.id }}">
+                                    <input type="hidden" name="att_status" value="Absent">
+                                    <input type="hidden" name="att_date" value="{{ att_date }}">
+                                    <input type="hidden" name="tab" value="{{ tab_filter }}">
+                                    <input type="hidden" name="batch" value="{{ batch_filter }}">
+                                    <input type="hidden" name="q" value="{{ search_q }}">
+                                    <button type="submit" class="btn-sm btn-att-a" title="Mark Absent">A</button>
+                                </form>
+
+                                <form method="POST" action="/admin/students" style="display:inline;">
+                                    <input type="hidden" name="action" value="mark_attendance">
+                                    <input type="hidden" name="student_id" value="{{ st.id }}">
+                                    <input type="hidden" name="att_status" value="Leave">
+                                    <input type="hidden" name="att_date" value="{{ att_date }}">
+                                    <input type="hidden" name="tab" value="{{ tab_filter }}">
+                                    <input type="hidden" name="batch" value="{{ batch_filter }}">
+                                    <input type="hidden" name="q" value="{{ search_q }}">
+                                    <button type="submit" class="btn-sm btn-att-l" title="Mark Leave">L</button>
+                                </form>
+
+                                <a href="/admin-student-profile/{{ st.id }}" target="_blank" class="btn-sm btn-dossier">👁️ Dossier</a>
+
+                                {% if st.status == 'Inactive' %}
+                                <form method="POST" action="/admin/students" style="display:inline;">
+                                    <input type="hidden" name="action" value="toggle_status">
+                                    <input type="hidden" name="student_id" value="{{ st.id }}">
+                                    <input type="hidden" name="target_status" value="Active">
+                                    <input type="hidden" name="att_date" value="{{ att_date }}">
+                                    <input type="hidden" name="tab" value="{{ tab_filter }}">
+                                    <input type="hidden" name="batch" value="{{ batch_filter }}">
+                                    <input type="hidden" name="q" value="{{ search_q }}">
+                                    <button type="submit" class="btn-sm btn-activate">Activate</button>
+                                </form>
+                                {% else %}
+                                <form method="POST" action="/admin/students" style="display:inline;">
+                                    <input type="hidden" name="action" value="toggle_status">
+                                    <input type="hidden" name="student_id" value="{{ st.id }}">
+                                    <input type="hidden" name="target_status" value="Inactive">
+                                    <input type="hidden" name="att_date" value="{{ att_date }}">
+                                    <input type="hidden" name="tab" value="{{ tab_filter }}">
+                                    <input type="hidden" name="batch" value="{{ batch_filter }}">
+                                    <input type="hidden" name="q" value="{{ search_q }}">
+                                    <button type="submit" class="btn-sm btn-deactivate">Deactivate</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align:center;padding:28px;color:var(--text-muted);">
+            No students found for the current filter.
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

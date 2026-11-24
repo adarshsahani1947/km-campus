@@ -1,0 +1,695 @@
+{% extends "common/base.html" %}
+
+{% block title %}Roster Status & Attendance - KM Campus{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-admin: #1e3c72;
+        --secondary-admin: #2a5298;
+        --bg-color: #f4f7fa;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+        background: var(--bg-color);
+        padding: 16px;
+        color: var(--text-main);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .container { max-width: 1180px; margin: auto; }
+
+    .header-bar {
+        background: var(--card-bg);
+        padding: 16px 22px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 3px 14px rgba(0, 0, 0, 0.04);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .header-bar h2 { margin: 0; color: var(--primary-admin); font-size: 19px; font-weight: 700; }
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    .btn-top {
+        padding: 7px 12px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-jump-att { background: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc; }
+    .btn-register-top { background: #059669; color: #ffffff !important; }
+    .btn-fees-link { background: #eff6ff; color: var(--primary-admin); border: 1px solid #bfdbfe; }
+    .btn-back { background: #e2e8f0; color: #334155; }
+
+    .flash-banner {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        color: #065f46;
+        padding: 10px 14px;
+        border-radius: 9px;
+        font-size: 12.5px;
+        font-weight: 600;
+        margin-bottom: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .panel-card {
+        background: var(--card-bg);
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 3px 14px rgba(0, 0, 0, 0.04);
+        margin-bottom: 14px;
+    }
+
+    /* Compact Colorful Search Attendance Card at Top */
+    #search-attendance-card {
+        background: linear-gradient(180deg, #eef2ff 0%, #ffffff 54px);
+        border: 1px solid #c7d2fe;
+        border-top: 4px solid #4f46e5;
+        padding: 14px 16px;
+    }
+
+    .att-title-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #4f46e5;
+        color: #ffffff;
+        font-size: 13.5px;
+        font-weight: 700;
+        padding: 4px 11px;
+        border-radius: 8px;
+    }
+
+    .roster-title-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #1e3c72;
+        color: #ffffff;
+        font-size: 13.5px;
+        font-weight: 700;
+        padding: 4px 11px;
+        border-radius: 8px;
+    }
+
+    .att-subcards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .att-sub-daily {
+        background: #eff6ff;
+        border: 1px solid #93c5fd;
+        border-left: 3px solid #2563eb;
+        border-radius: 9px;
+        padding: 10px 12px;
+    }
+
+    .att-sub-monthly {
+        background: #ecfdf5;
+        border: 1px solid #6ee7b7;
+        border-left: 3px solid #0d9488;
+        border-radius: 9px;
+        padding: 10px 12px;
+    }
+
+    .sub-label-daily { font-size: 11.5px; font-weight: 800; color: #1d4ed8; margin-bottom: 7px; }
+    .sub-label-monthly { font-size: 11.5px; font-weight: 800; color: #0f766e; margin-bottom: 7px; }
+
+    .sub-form-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+    /* Grouped Roster Card Attached Directly Above Student Roster List */
+    #grouped-roster-card {
+        margin-bottom: 0;
+        border-bottom: none;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        padding: 14px 16px;
+    }
+
+    #roster-list-card {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        padding: 16px;
+    }
+
+    .grouped-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+    }
+
+    .summary-subcard {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-top: 3px solid var(--primary-admin);
+        border-radius: 9px;
+        padding: 11px 13px;
+    }
+
+    .summary-subcard.sub-active { border-top-color: #059669; }
+    .summary-subcard.sub-inactive { border-top-color: #dc2626; }
+    .summary-subcard.sub-total { border-top-color: #1e3c72; }
+
+    .subcard-title { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+    .subcard-num { font-size: 22px; font-weight: 800; margin: 2px 0 4px; }
+    .num-green { color: #059669; }
+    .num-red { color: #dc2626; }
+    .num-navy { color: var(--primary-admin); }
+    .subcard-desc { font-size: 11.5px; color: var(--text-main); margin: 0 0 4px; }
+    .subcard-foot { font-size: 11px; color: var(--text-muted); }
+
+    .card-head-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .head-controls { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+    .btn-ghost-toggle {
+        background: #ffffff;
+        color: #1e293b;
+        border: 1px solid #cbd5e1;
+        padding: 6px 11px;
+        border-radius: 7px;
+        font-size: 11.5px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-print-q {
+        background: #d97706;
+        color: #ffffff;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 7px;
+        font-size: 11.5px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .filter-form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+
+    .form-control {
+        box-sizing: border-box;
+        padding: 6px 9px;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        font-size: 12.5px;
+        background: #ffffff;
+        color: var(--text-main);
+    }
+
+    .btn-search-daily {
+        background: #2563eb;
+        color: #ffffff !important;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-search-monthly {
+        background: #0d9488;
+        color: #ffffff !important;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-filter {
+        background: var(--primary-admin);
+        color: #ffffff !important;
+        border: none;
+        padding: 6px 13px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-reset {
+        background: #f1f5f9;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        padding: 6px 11px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .tab-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tab-pill {
+        padding: 5px 11px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #334155;
+    }
+    .tab-pill.active { background: var(--primary-admin); color: #ffffff; border-color: var(--primary-admin); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th {
+        text-align: left;
+        padding: 8px 10px;
+        background: #f8fafc;
+        color: var(--text-muted);
+        font-size: 10.5px;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    td { padding: 9px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+    .badge-active { display: inline-block; background: #d1fae5; color: #065f46; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+    .badge-inactive { display: inline-block; background: #fee2e2; color: #991b1b; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+
+    .flag-p { background: #dcfce7; color: #166534; border: 1px solid #86efac; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; display: inline-block; }
+    .flag-a { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; display: inline-block; }
+    .flag-l { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; display: inline-block; }
+    .flag-u { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; display: inline-block; }
+
+    .student-match-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px 11px;
+        border: 1px solid #e2e8f0;
+        border-left: 3px solid #0d9488;
+        border-radius: 8px;
+        margin-bottom: 7px;
+        background: #ffffff;
+    }
+
+    .month-expand-box {
+        margin-bottom: 9px;
+        padding: 9px 11px;
+        background: #f0fdfa;
+        border: 1px solid #99f6e4;
+        border-radius: 8px;
+    }
+
+    .btn-sm { padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+    .btn-activate { background: #d1fae5; color: #065f46; }
+    .btn-deactivate { background: #fee2e2; color: #991b1b; }
+    .btn-show-att { background: #0f766e; color: #ffffff; }
+
+    .is-hidden { display: none !important; }
+
+    /* Print-Only Clean Report Header */
+    .print-report-banner { display: none; }
+
+    @media print {
+        body { background: #ffffff; padding: 0; color: #0f172a; }
+        .header-bar, .flash-banner, #grouped-roster-card, #roster-list-card,
+        .screen-only-att-header, .att-subcards-grid, .btn-show-att {
+            display: none !important;
+        }
+        #search-attendance-card {
+            background: #ffffff !important;
+            box-shadow: none !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 6px !important;
+            padding: 14px !important;
+        }
+        #att-list-body { display: block !important; }
+        .print-report-banner {
+            display: block !important;
+            border-bottom: 2px solid #1e3c72;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+        .print-report-title { font-size: 17px; font-weight: 800; color: #1e3c72; margin: 0 0 4px; }
+        .print-report-meta { font-size: 11.5px; color: #475569; margin: 0 0 6px; }
+        .print-summary-line { font-size: 11.5px; font-weight: 700; color: #0f172a; }
+        .month-expand-box.is-hidden { display: block !important; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    {% if roster_flash_msg %}
+    <div class="flash-banner">
+        <span>✓ {{ roster_flash_msg }}</span>
+        <button type="button" onclick="this.parentElement.style.display='none'" style="background:none;border:none;font-weight:800;cursor:pointer;color:#065f46;">✕</button>
+    </div>
+    {% endif %}
+
+    <!-- Top Header Bar -->
+    <div class="header-bar">
+        <div>
+            <h2>👥 Roster Status (Active & Deactivated)</h2>
+            <small style="color: var(--text-muted);">
+                KM Campus • Deactivated students remain in database history but are excluded from active & unpaid fee lists
+            </small>
+        </div>
+        <div class="header-actions">
+            <a href="#search-attendance-card" class="btn-top btn-jump-att">📅 Attendance</a>
+            <a href="/admin/register-or-edit" class="btn-top btn-register-top">+ Register New Student</a>
+            <a href="/admin/fees" class="btn-top btn-fees-link">💳 Fee Ledger</a>
+            <a href="/admin/dashboard" class="btn-top btn-back">&larr; Dashboard</a>
+        </div>
+    </div>
+
+    <!-- 1. Compact Search Attendance Card at Top (Hidden List Until Search Button Is Hit) -->
+    <div id="search-attendance-card" class="panel-card">
+        <div class="print-report-banner">
+            <h2 class="print-report-title">KM Campus — Attendance Query Report</h2>
+            <p class="print-report-meta">
+                {% if is_monthly_mode %}
+                    Monthly Student Report • <strong>{{ att_month }} {{ att_year }}</strong>
+                    {% if att_name %} • Student: <strong>"{{ att_name }}"</strong>{% endif %}
+                {% else %}
+                    Daily Class Report • Date: <strong>{{ att_date }}</strong> • Class: <strong>{{ att_class if att_class else 'All Classes' }}</strong>
+                {% endif %}
+                • {{ print_timestamp_str }}
+            </p>
+            <div class="print-summary-line">
+                P: {{ present_count }} | A: {{ absent_count }} | L: {{ leave_count }} | U: {{ unmarked_count }}
+            </div>
+        </div>
+
+        <div class="card-head-row screen-only-att-header">
+            <div class="att-title-pill">📅 Search Attendance</div>
+            <div class="head-controls">
+                <button type="button" id="btnToggleAttList" onclick="toggleListSection('att')" class="btn-ghost-toggle">
+                    {{ 'Hide List' if att_searched else 'Show List' }}
+                </button>
+                <button type="button" onclick="window.print()" class="btn-print-q">
+                    🖨️ Print Attendance Query
+                </button>
+            </div>
+        </div>
+
+        <div class="att-subcards-grid">
+            <!-- Sub-Card 1: Date + Class -->
+            <div class="att-sub-daily">
+                <div class="sub-label-daily">Date & Class</div>
+                <form method="GET" action="/admin/roster#search-attendance-card" class="sub-form-row">
+                    <input type="hidden" name="att_searched" value="1">
+                    <input type="hidden" name="att_mode" value="daily">
+
+                    <input type="date" name="att_date" value="{{ att_date }}" class="form-control" aria-label="Attendance Date">
+                    <select name="att_class" class="form-control" aria-label="Class">
+                        <option value="">All Classes</option>
+                        {% for cls in class_options %}
+                        <option value="{{ cls }}" {% if att_class == cls %}selected{% endif %}>{{ cls }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-search-daily">Search</button>
+                </form>
+            </div>
+
+            <!-- Sub-Card 2: Student Name + Month + Year -->
+            <div class="att-sub-monthly">
+                <div class="sub-label-monthly">Student Name (Monthly)</div>
+                <form method="GET" action="/admin/roster#search-attendance-card" class="sub-form-row">
+                    <input type="hidden" name="att_searched" value="1">
+                    <input type="hidden" name="att_mode" value="monthly">
+
+                    <input type="text" name="att_name" value="{{ att_name }}" class="form-control" style="flex:1;min-width:130px;"
+                           placeholder="Student name...">
+                    <select name="att_month" class="form-control" aria-label="Month">
+                        {% for mo in month_options %}
+                        <option value="{{ mo }}" {% if att_month == mo %}selected{% endif %}>{{ mo }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="att_year" class="form-control" aria-label="Year">
+                        {% for yr in year_options %}
+                        <option value="{{ yr }}" {% if att_year == yr %}selected{% endif %}>{{ yr }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-search-monthly">Search</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="att-list-body" class="{% if not att_searched %}is-hidden{% endif %}">
+            {% if att_searched %}
+                {% if is_monthly_mode %}
+                    {% if student_match_list %}
+                        {% for sm in student_match_list %}
+                        <div class="student-match-line">
+                            <div>
+                                <strong>{{ sm.name }}</strong>
+                                <small style="color:var(--text-muted);">• Class: {{ sm.school_class }}</small>
+                                <small style="color:var(--text-muted);">• {{ att_month }} {{ att_year }} ({{ sm.m_present }}P / {{ sm.m_absent }}A / {{ sm.m_leave }}L)</small>
+                            </div>
+                            <button type="button" id="btnShowAtt-{{ sm.id }}" onclick="toggleMonthBox({{ sm.id }})" class="btn-sm btn-show-att">
+                                Show Attendance
+                            </button>
+                        </div>
+                        <div id="month-box-{{ sm.id }}" class="month-expand-box is-hidden">
+                            {% if sm.month_records %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Flag</th>
+                                        <th>Remark</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for mr in sm.month_records %}
+                                    <tr>
+                                        <td>{{ mr.att_date }}</td>
+                                        <td>
+                                            {% if mr.status == 'Present' %}<span class="flag-p">P</span>
+                                            {% elif mr.status == 'Absent' %}<span class="flag-a">A</span>
+                                            {% elif mr.status == 'Leave' %}<span class="flag-l">L</span>
+                                            {% else %}<span class="flag-u">U</span>{% endif %}
+                                        </td>
+                                        <td><small style="color:var(--text-muted);">{{ mr.remark or '—' }}</small></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <div style="font-size:12px;color:#475569;"><span class="flag-u">U</span> Unmarked for {{ att_month }} {{ att_year }}.</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div style="text-align:center;padding:10px;color:var(--text-muted);font-size:12px;">No student matched "{{ att_name }}".</div>
+                    {% endif %}
+                {% else %}
+                    {% if daily_rows %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Class</th>
+                                <th>Flag</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dr in daily_rows %}
+                            <tr>
+                                <td><strong>{{ dr.name }}</strong></td>
+                                <td>{{ dr.school_class }}</td>
+                                <td>
+                                    {% if dr.att_status == 'Present' %}<span class="flag-p">P</span>
+                                    {% elif dr.att_status == 'Absent' %}<span class="flag-a">A</span>
+                                    {% elif dr.att_status == 'Leave' %}<span class="flag-l">L</span>
+                                    {% else %}<span class="flag-u">U</span>{% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div style="text-align:center;padding:10px;color:var(--text-muted);font-size:12px;">No records for {{ att_date }}.</div>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 2. Grouped Roster Summary Card (Attached Directly Above Student Roster List) -->
+    <div id="grouped-roster-card" class="panel-card">
+        <div class="grouped-summary-grid">
+            <a href="/admin/roster?roster_show=1&tab=Active{% if selected_batch %}&batch={{ selected_batch | urlencode }}{% endif %}"
+               class="summary-subcard sub-active">
+                <div class="subcard-title">Active Students</div>
+                <div class="subcard-num num-green">{{ active_count }}</div>
+                <p class="subcard-desc">Currently enrolled students.</p>
+                <div class="subcard-foot">In active & unpaid fee lists</div>
+            </a>
+
+            <a href="/admin/roster?roster_show=1&tab=Inactive{% if selected_batch %}&batch={{ selected_batch | urlencode }}{% endif %}"
+               class="summary-subcard sub-inactive">
+                <div class="subcard-title">Deactivated / Left</div>
+                <div class="subcard-num num-red">{{ inactive_count }}</div>
+                <p class="subcard-desc">Left institution; history kept.</p>
+                <div class="subcard-foot">Excluded from unpaid fee lists</div>
+            </a>
+
+            <a href="/admin/roster?roster_show=1&tab=All{% if selected_batch %}&batch={{ selected_batch | urlencode }}{% endif %}"
+               class="summary-subcard sub-total">
+                <div class="subcard-title">Total Roster</div>
+                <div class="subcard-num num-navy">{{ total_count }}</div>
+                <p class="subcard-desc">Active + deactivated count.</p>
+                <div class="subcard-foot">All records in batch</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- 3. Student Roster List Card (Attached Directly Below Grouped Summary Card; Hidden Until Search/Sub-Card Hit) -->
+    <div id="roster-list-card" class="panel-card">
+        <div class="card-head-row">
+            <div class="roster-title-pill">📋 Student Roster List{% if show_roster_list %} ({{ roster_rows|length }}){% endif %}</div>
+            <div class="head-controls">
+                <div class="tab-pills">
+                    <a href="/admin/roster?roster_show=1&tab=All{% if selected_batch %}&batch={{ selected_batch | urlencode }}{% endif %}{% if search_q %}&q={{ search_q | urlencode }}{% endif %}"
+                       class="tab-pill {% if show_roster_list and tab_filter == 'All' %}active{% endif %}">All</a>
+                    <a href="/admin/roster?roster_show=1&tab=Active{% if selected_batch %}&batch={{ selected_batch | urlencode }}{% endif %}{% if search_q %}&q={{ search_q | urlencode }}{% endif %}"
+                       class="tab-pill {% if show_roster_list and tab_filter == 'Active' %}active{% endif %}">Active</a>
+                    <a href="/admin/roster?roster_show=1&tab=Inactive{% if selected_batch %}&batch={{ selected_batch | urlencode }}{% endif %}{% if search_q %}&q={{ search_q | urlencode }}{% endif %}"
+                       class="tab-pill {% if show_roster_list and tab_filter == 'Inactive' %}active{% endif %}">Left</a>
+                </div>
+                <button type="button" id="btnToggleRosterList" onclick="toggleListSection('roster')" class="btn-ghost-toggle">
+                    {{ 'Hide List' if show_roster_list else 'Show List' }}
+                </button>
+            </div>
+        </div>
+
+        <form method="GET" action="/admin/roster" class="filter-form">
+            <input type="hidden" name="roster_show" value="1">
+            <input type="hidden" name="tab" value="{{ tab_filter }}">
+            <input type="text" name="q" value="{{ search_q }}" class="form-control" style="flex:1;min-width:190px;"
+                   placeholder="Search name, phone, class...">
+            <select name="batch" class="form-control" aria-label="Batch">
+                <option value="">All Batches</option>
+                {% for b in batch_options %}
+                <option value="{{ b }}" {% if selected_batch == b %}selected{% endif %}>{{ b }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-filter">Search</button>
+            <a href="/admin/roster" class="btn-reset">Reset</a>
+        </form>
+
+        <div id="roster-list-body" class="{% if not show_roster_list %}is-hidden{% endif %}">
+            {% if show_roster_list %}
+                {% if roster_rows %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Class</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for st in roster_rows %}
+                        <tr>
+                            <td><strong>{{ st.name }}</strong> <small style="color:var(--text-muted);">{{ st.phone or '' }}</small></td>
+                            <td>{{ st.school_class or 'N/A' }}</td>
+                            <td>
+                                {% if st.status == 'Inactive' %}
+                                    <span class="badge-inactive">Left</span>
+                                {% else %}
+                                    <span class="badge-active">Active</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if st.status == 'Inactive' %}
+                                <form method="POST" action="/admin/roster" style="display:inline;">
+                                    <input type="hidden" name="action" value="toggle_status">
+                                    <input type="hidden" name="student_id" value="{{ st.id }}">
+                                    <input type="hidden" name="target_status" value="Active">
+                                    <button type="submit" class="btn-sm btn-activate">Mark Active</button>
+                                </form>
+                                {% else %}
+                                <form method="POST" action="/admin/roster" style="display:inline;">
+                                    <input type="hidden" name="action" value="toggle_status">
+                                    <input type="hidden" name="student_id" value="{{ st.id }}">
+                                    <input type="hidden" name="target_status" value="Inactive">
+                                    <button type="submit" class="btn-sm btn-deactivate">Deactivate (Left)</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div style="text-align:center;padding:10px;color:var(--text-muted);font-size:12px;">No matching students found.</div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleListSection(which) {
+        if (which === 'att') {
+            const body = document.getElementById('att-list-body');
+            const btn = document.getElementById('btnToggleAttList');
+            if (!body) return;
+            const isHidden = body.classList.toggle('is-hidden');
+            if (btn) btn.innerText = isHidden ? 'Show List' : 'Hide List';
+        } else if (which === 'roster') {
+            const body = document.getElementById('roster-list-body');
+            const btn = document.getElementById('btnToggleRosterList');
+            if (!body) return;
+            const isHidden = body.classList.toggle('is-hidden');
+            if (btn) btn.innerText = isHidden ? 'Show List' : 'Hide List';
+        }
+    }
+
+    function toggleMonthBox(studentId) {
+        const box = document.getElementById('month-box-' + studentId);
+        const btn = document.getElementById('btnShowAtt-' + studentId);
+        if (!box) return;
+        const isNowHidden = box.classList.toggle('is-hidden');
+        if (btn) btn.innerText = isNowHidden ? 'Show Attendance' : 'Hide Attendance';
+    }
+</script>
+{% endblock %}

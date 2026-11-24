@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*.sqlite
+*.sqlite3
+database.db*
+plain_password.db*
+.env
+*.tar.gz
+*.zip
+static/uploads/photos/*.png

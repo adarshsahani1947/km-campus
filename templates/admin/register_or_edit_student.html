@@ -1,0 +1,1040 @@
+{% extends "common/base.html" %}
+
+{% block title %}Register or Edit Student - KM Campus{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --bg-page: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #fefce8 100%);
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+    }
+
+    body {
+        background: var(--bg-page);
+        min-height: 100vh;
+        padding: 18px;
+        color: var(--text-main);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .container { max-width: 1160px; margin: auto; }
+
+    /* Soft Pastel Header */
+    .header-bar {
+        background: linear-gradient(120deg, #e0f2fe 0%, #ede9fe 55%, #dcfce7 100%);
+        color: #1e293b;
+        border: 1px solid #cbd5e1;
+        border-radius: 16px;
+        padding: 18px 24px;
+        box-shadow: 0 6px 18px rgba(100, 116, 139, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .header-bar h2 { margin: 0; font-size: 20px; font-weight: 800; color: #1e3a8a; }
+    .header-sub { font-size: 12.5px; color: #475569; margin-top: 3px; display: block; }
+
+    .mode-switch-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+    .btn-mode-new {
+        background: #dcfce7;
+        color: #166534;
+        border: 1.5px solid #86efac;
+        padding: 9px 15px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .btn-mode-new:hover { background: #bbf7d0; }
+
+    .btn-mode-edit {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1.5px solid #fcd34d;
+        padding: 9px 15px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .btn-mode-edit:hover { background: #fde68a; }
+
+    .btn-top-light {
+        background: #ffffff;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        padding: 8px 13px;
+        border-radius: 10px;
+        font-size: 12.5px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+    .btn-top-light:hover { background: #f8fafc; }
+
+    /* Visual Showcase Banner Shown When Form Is Collapsed */
+    .showcase-banner {
+        background: linear-gradient(125deg, #ffffff 0%, #f0f9ff 50%, #fdf2f8 100%);
+        border: 2px dashed #a5b4fc;
+        border-radius: 16px;
+        padding: 20px 24px;
+        box-shadow: 0 6px 18px rgba(99, 102, 241, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        cursor: pointer;
+        margin-bottom: 18px;
+    }
+
+    .showcase-art {
+        width: 124px;
+        height: 84px;
+        flex-shrink: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    .showcase-copy h3 { margin: 0 0 5px; font-size: 16.5px; font-weight: 800; color: #1e3a8a; }
+    .showcase-copy p { margin: 0; font-size: 13px; color: var(--text-muted); }
+
+    .showcase-pill {
+        background: #e0e7ff;
+        color: #3730a3;
+        border: 1px solid #c7d2fe;
+        padding: 8px 15px;
+        border-radius: 999px;
+        font-size: 12.5px;
+        font-weight: 700;
+    }
+
+    /* Outer Group Wrapper for Personal, Address & Photo/Aadhaar Cards */
+    .form-group-shell {
+        background: #f8fafc;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 16px;
+        padding: 18px 20px;
+        margin-bottom: 18px;
+        box-shadow: 0 6px 20px rgba(148, 163, 184, 0.12);
+    }
+
+    .group-shell-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .group-shell-badge {
+        font-size: 13px;
+        font-weight: 800;
+        color: #1e3a8a;
+        background: #e0f2fe;
+        padding: 5px 12px;
+        border-radius: 999px;
+    }
+
+    .section-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 3px 12px rgba(148, 163, 184, 0.08);
+        margin-bottom: 14px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .card-personal { border-top: 4px solid #60a5fa; background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 42px); }
+    .card-address  { border-top: 4px solid #2dd4bf; background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 42px); }
+    .card-docs     { border-top: 4px solid #fbbf24; background: linear-gradient(180deg, #fffbeb 0%, #ffffff 42px); }
+    .card-search   { border-top: 4px solid #a78bfa; background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 46px); }
+
+    .section-title {
+        font-size: 14.5px;
+        font-weight: 800;
+        margin: 0 0 14px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .title-blue   { color: #1d4ed8; }
+    .title-teal   { color: #0f766e; }
+    .title-amber  { color: #b45309; }
+    .title-purple { color: #6d28d9; }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 14px;
+    }
+
+    .field-group { display: flex; flex-direction: column; gap: 5px; }
+    .field-label { font-size: 12.5px; font-weight: 700; color: var(--text-main); }
+    .req-star { color: #e11d48; font-weight: 800; }
+    .opt-tag { color: var(--text-muted); font-size: 11px; font-weight: 600; }
+
+    .form-control {
+        box-sizing: border-box;
+        width: 100%;
+        padding: 8px 11px;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 9px;
+        font-size: 13px;
+        background: #ffffff;
+        color: var(--text-main);
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+
+    .field-help { font-size: 11.5px; color: var(--text-muted); line-height: 1.35; }
+    .file-link { font-size: 12px; color: #059669; font-weight: 700; text-decoration: none; }
+
+    .form-actions-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+    }
+
+    .btn-clear-form {
+        background: #f1f5f9;
+        color: #334155;
+        border: 1.5px solid #cbd5e1;
+        padding: 9px 16px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .btn-clear-form:hover:not(:disabled) { background: #e2e8f0; }
+    .btn-clear-form:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: #f8fafc;
+        color: #94a3b8;
+    }
+
+    .btn-cancel-edit {
+        background: #ffe4e6;
+        color: #9f1239;
+        border: 1.5px solid #fda4af;
+        padding: 9px 16px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .btn-cancel-edit:hover { background: #fecdd3; }
+
+    .btn-submit {
+        background: #bbf7d0;
+        color: #14532d;
+        border: 1.5px solid #4ade80;
+        padding: 9px 22px;
+        border-radius: 9px;
+        font-size: 13.5px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+    .btn-submit:hover { background: #86efac; }
+
+    .btn-collapse-form {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-search-purple {
+        background: #ede9fe;
+        color: #5b21b6;
+        border: 1.5px solid #c4b5fd;
+        padding: 8px 18px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+    .btn-search-purple:hover { background: #ddd6fe; }
+
+    .btn-edit-pick {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1.5px solid #fcd34d;
+        padding: 6px 12px;
+        border-radius: 7px;
+        font-size: 11.5px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+    .btn-edit-pick:hover { background: #fde68a; }
+
+    .candidate-card {
+        background: #fafaff;
+        border: 1px solid #ddd6fe;
+        border-left: 4px solid #a78bfa;
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .badge-active { background: #dcfce7; color: #166534; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+    .badge-inactive { background: #fee2e2; color: #991b1b; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+
+    /* Light Red & Green Popup Banner + Modal */
+    .popup-banner {
+        padding: 13px 16px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+    .popup-error { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+    .popup-success { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+
+    .popup-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(148, 163, 184, 0.35);
+        backdrop-filter: blur(2px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 16px;
+    }
+    .popup-card {
+        max-width: 460px;
+        width: 100%;
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 20px 22px;
+        box-shadow: 0 14px 30px rgba(71, 85, 105, 0.18);
+    }
+    .popup-card.is-error { border-top: 5px solid #f87171; }
+    .popup-card.is-success { border-top: 5px solid #4ade80; }
+
+    .popup-title { font-size: 16px; font-weight: 800; margin: 0 0 8px; }
+    .popup-title.is-error { color: #b91c1c; }
+    .popup-title.is-success { color: #15803d; }
+
+    .popup-text { font-size: 13px; color: #334155; line-height: 1.5; margin: 0 0 16px; }
+
+    .btn-popup-ok {
+        border: none;
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    .btn-popup-ok.is-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .btn-popup-ok.is-success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+
+    .is-hidden { display: none !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- Popup Modal -->
+    <div id="statusPopupModal" class="popup-backdrop {% if not flash_msg %}is-hidden{% endif %}" role="dialog" aria-modal="true">
+        <div id="statusPopupCard" class="popup-card {% if flash_status == 'error' %}is-error{% else %}is-success{% endif %}">
+            <h3 id="statusPopupTitle" class="popup-title {% if flash_status == 'error' %}is-error{% else %}is-success{% endif %}">
+                {% if flash_status == 'error' %}⚠️ Validation Error{% else %}✓ Notice{% endif %}
+            </h3>
+            <p id="statusPopupText" class="popup-text">{{ flash_msg or '' }}</p>
+            <div style="text-align:right;">
+                <button type="button" id="statusPopupBtn" onclick="closeStatusPopup()"
+                        class="btn-popup-ok {% if flash_status == 'error' %}is-error{% else %}is-success{% endif %}">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Light Pastel Top Header -->
+    <div class="header-bar">
+        <div>
+            <h2>🌸 KM Campus — Student Admission &amp; Profile Desk</h2>
+            <span class="header-sub">Search a student to edit or open the form • Mandatory fields marked with <span class="req-star">*</span></span>
+        </div>
+        <div class="mode-switch-group">
+            <button type="button" onclick="openFormForNewStudent()" class="btn-mode-new">➕ New Student</button>
+            <button type="button" onclick="openFormForEditExisting()" class="btn-mode-edit">✏️ Edit Existing</button>
+            <a href="/admin/roster" class="btn-top-light">📋 Roster</a>
+            <a href="/admin/dashboard" class="btn-top-light">&larr; Dashboard</a>
+        </div>
+    </div>
+
+    {% if flash_msg %}
+    <div class="popup-banner {% if flash_status == 'error' %}popup-error{% else %}popup-success{% endif %}">
+        <span>{{ flash_msg }}</span>
+        <button type="button" onclick="this.parentElement.style.display='none'" style="background:none;border:none;font-weight:800;cursor:pointer;color:inherit;">✕</button>
+    </div>
+    {% endif %}
+
+    <!-- Search Existing Student & Candidate Suggestions (Placed Above Form for Quick Lookup) -->
+    <div id="searchStudentCard" class="section-card card-search">
+        <h3 class="section-title title-purple">
+            <span>Search Existing Student &amp; Candidate Suggestions</span>
+            <button type="button" id="btnToggleCandidateList" onclick="toggleCandidateBox()" class="btn-collapse-form is-hidden">
+                Hide Results ✕
+            </button>
+        </h3>
+
+        <form method="GET" action="/admin/register-or-edit" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <input type="hidden" name="do_search" value="1">
+            <input type="text" name="q" value="{{ search_q }}" class="form-control" style="flex:1;min-width:220px;"
+                   placeholder="Type student name (even with minor typos), class, or village to search...">
+            <select name="status" class="form-control" style="max-width:165px;">
+                <option value="All" {% if status_filter == 'All' %}selected{% endif %}>All Status</option>
+                <option value="Active" {% if status_filter == 'Active' %}selected{% endif %}>Active</option>
+                <option value="Inactive" {% if status_filter == 'Inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+            <button type="submit" class="btn-search-purple">🔍 Search</button>
+        </form>
+
+        <!-- Only rendered when an explicit non-empty query was searched -->
+        <div id="candidateListBox" class="is-hidden" style="margin-top:14px;">
+            {% if search_executed and search_q %}
+                {% if students %}
+                    {% for st in students %}
+                    <div class="candidate-card">
+                        <div>
+                            <strong>{{ st.name }}</strong>
+                            <small style="color:var(--text-muted);">• S/o {{ st.father_name or 'N/A' }} • Class: {{ st.school_class or 'N/A' }} • {{ st.batch }}</small>
+                            {% if st.village %}
+                            <small style="color:var(--text-muted);">• {{ st.village }}</small>
+                            {% endif %}
+                            <span class="{% if st.status == 'Inactive' %}badge-inactive{% else %}badge-active{% endif %}" style="margin-left:6px;">
+                                {{ st.status }}
+                            </span>
+                        </div>
+                        <button type="button" class="btn-edit-pick" data-student='{{ st | tojson }}'>
+                            Edit Candidate
+                        </button>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align:center;padding:12px;color:var(--text-muted);font-size:12.5px;">
+                        No matching or similar candidate found for "<strong>{{ search_q }}</strong>".
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Picture Showcase Shown on Initial Load / Reload When Form Is Collapsed -->
+    <div id="formShowcaseBanner" class="showcase-banner" onclick="openFormForNewStudent()">
+        <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+            <div class="showcase-art">
+                <svg viewBox="0 0 124 84" width="124" height="84" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="pastelSky" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#bae6fd"/>
+                            <stop offset="55%" stop-color="#e9d5ff"/>
+                            <stop offset="100%" stop-color="#fbcfe8"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="124" height="84" fill="url(#pastelSky)"/>
+                    <circle cx="96" cy="20" r="10" fill="#fef08a"/>
+                    <polygon points="20,42 62,20 104,42" fill="#ffffff"/>
+                    <rect x="28" y="42" width="68" height="30" rx="4" fill="#ffffff"/>
+                    <rect x="55" y="52" width="14" height="20" rx="2" fill="#fde68a"/>
+                    <rect x="35" y="48" width="13" height="10" rx="2" fill="#bae6fd"/>
+                    <rect x="76" y="48" width="13" height="10" rx="2" fill="#bbf7d0"/>
+                </svg>
+            </div>
+            <div class="showcase-copy">
+                <h3>Student Registration &amp; Profile Editor</h3>
+                <p>Form starts collapsed on load &amp; reload. Click here, <strong>New Student</strong>, or <strong>Edit Existing</strong> to expand.</p>
+            </div>
+        </div>
+        <span class="showcase-pill">Expand Form →</span>
+    </div>
+
+    <!-- Grouped Form Cards (Hidden on Initial Load & Reload) -->
+    <div id="studentFormWrapper" class="is-hidden">
+        <form id="studentForm" method="POST" action="/admin/register-or-edit" enctype="multipart/form-data" novalidate>
+            <input type="hidden" id="formAction" name="action" value="create_student">
+            <input type="hidden" id="studentId" name="student_id" value="">
+
+            <div class="form-group-shell">
+                <div class="group-shell-header">
+                    <span id="formGroupBadge" class="group-shell-badge">📝 New Student Form Group</span>
+                    <button type="button" onclick="collapseFormSection()" class="btn-collapse-form">Hide Form ✕</button>
+                </div>
+
+                <!-- Personal & Academic Details -->
+                <div class="section-card card-personal">
+                    <h3 class="section-title title-blue">Personal &amp; Academic Details</h3>
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label class="field-label" for="name">Student Name <span class="req-star">*</span></label>
+                            <input type="text" id="name" name="name" class="form-control" placeholder="Full name">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="father_name">Father's Name <span class="req-star">*</span></label>
+                            <input type="text" id="father_name" name="father_name" class="form-control" placeholder="Father's name">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="mother_name">Mother's Name <span class="opt-tag">(Optional)</span></label>
+                            <input type="text" id="mother_name" name="mother_name" class="form-control" placeholder="Mother's name">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="dob">Date of Birth <span class="opt-tag">(Optional)</span></label>
+                            <input type="date" id="dob" name="dob" class="form-control">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="gender">Gender <span class="req-star">*</span></label>
+                            <select id="gender" name="gender" class="form-control">
+                                <option value="">-- Select Gender --</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="phone">Mobile Number <span class="opt-tag">(Optional)</span></label>
+                            <input type="text" id="phone" name="phone" class="form-control" placeholder="10-digit mobile">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="email">Email <span class="opt-tag">(Optional)</span></label>
+                            <input type="email" id="email" name="email" class="form-control" placeholder="student@example.com">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="username">Username <span class="opt-tag">(Optional)</span></label>
+                            <input type="text" id="username" name="username" class="form-control" placeholder="Auto-generated if blank">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="password">Password <span class="opt-tag">(Optional on edit)</span></label>
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Set or reset password">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="school_class">Class <span class="req-star">*</span></label>
+                            <input type="text" id="school_class" name="school_class" class="form-control" placeholder="e.g. Class 10, Class 12">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="batch">Batch <span class="req-star">*</span></label>
+                            <select id="batch" name="batch" class="form-control">
+                                {% for b in batch_options %}
+                                <option value="{{ b }}">{{ b }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="status">Status <span class="opt-tag">(Optional)</span></label>
+                            <select id="status" name="status" class="form-control">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive (Left)</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group" style="grid-column: 1 / -1;">
+                            <label class="field-label" for="leaving_reason">Leaving Reason <span class="opt-tag">(Optional)</span></label>
+                            <input type="text" id="leaving_reason" name="leaving_reason" class="form-control" placeholder="Reason if left institution">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Details -->
+                <div class="section-card card-address">
+                    <h3 class="section-title title-teal">Address Details</h3>
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label class="field-label" for="country">Country <span class="req-star">*</span></label>
+                            <input type="text" id="country" name="country" value="India" class="form-control">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="state">State <span class="req-star">*</span> <span class="opt-tag">(Type to change)</span></label>
+                            <input type="text" id="state" name="state" value="Bihar" list="stateSuggestions" class="form-control">
+                            <datalist id="stateSuggestions">
+                                <option value="Bihar">
+                                <option value="Jharkhand">
+                                <option value="Uttar Pradesh">
+                                <option value="West Bengal">
+                                <option value="Delhi">
+                            </datalist>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="district">District <span class="req-star">*</span></label>
+                            <input type="text" id="district" name="district" value="Begusarai" class="form-control">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="subdivision">Subdivision <span class="req-star">*</span></label>
+                            <select id="subdivision" name="subdivision" class="form-control">
+                                <option value="Teghra" selected>Teghra</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="block">Block <span class="req-star">*</span></label>
+                            <select id="block" name="block" class="form-control">
+                                <option value="">-- Select Block (Teghra Subdivision) --</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="panchayat">Panchayat <span class="opt-tag">(Optional)</span></label>
+                            <select id="panchayatSelect" class="form-control is-hidden">
+                                <option value="">-- Select Panchayat --</option>
+                            </select>
+                            <input type="text" id="panchayatInput" class="form-control" placeholder="Enter Panchayat name">
+                            <input type="hidden" id="panchayat" name="panchayat" value="">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="village">Village <span class="req-star">*</span></label>
+                            <input type="text" id="village" name="village" class="form-control" placeholder="Enter village name">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="post">Post Office <span class="opt-tag">(Optional)</span></label>
+                            <input type="text" id="post" name="post" class="form-control" placeholder="Post office">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="police_station">Police Station <span class="opt-tag">(Optional)</span></label>
+                            <input type="text" id="police_station" name="police_station" class="form-control" placeholder="Police station">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="pincode">PIN Code <span class="opt-tag">(Optional)</span></label>
+                            <input type="text" id="pincode" name="pincode" maxlength="6" class="form-control" placeholder="6-digit PIN">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Photo & Aadhaar Details -->
+                <div class="section-card card-docs" style="margin-bottom:0;">
+                    <h3 class="section-title title-amber">Photo &amp; Aadhaar Details</h3>
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label class="field-label" for="photo">Student Photo <span class="opt-tag">(Optional • Max {{ photo_display_max_kb }}KB)</span></label>
+                            <input type="file" id="photo" name="photo" accept=".jpg,.jpeg,.png,.webp,image/*" class="form-control">
+                            <div class="field-help">Allowed: JPG, PNG, WEBP • Displayed limit: {{ photo_display_max_kb }}KB</div>
+                            <a id="currentPhotoLink" href="#" target="_blank" class="file-link is-hidden">✓ View Current Photo</a>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="aadhaar">Aadhaar Number <span class="opt-tag">(Optional)</span></label>
+                            <input type="text" id="aadhaar" name="aadhaar" maxlength="12" class="form-control" placeholder="12-digit Aadhaar number">
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="aadhaar_doc">Aadhaar Card Photo or PDF <span class="opt-tag">(Optional • Max {{ aadhaar_max_kb }}KB)</span></label>
+                            <input type="file" id="aadhaar_doc" name="aadhaar_doc" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" class="form-control">
+                            <div class="field-help">Allowed: Photo or PDF • Max size: {{ aadhaar_max_kb }}KB</div>
+                            <a id="currentDocLink" href="#" target="_blank" class="file-link is-hidden">✓ View Current Aadhaar File</a>
+                        </div>
+                    </div>
+
+                    <div class="form-actions-bar">
+                        <!-- Active only during New Student registration; disabled during Edit -->
+                        <button type="button" id="btnClearForm" onclick="clearNewStudentForm()" class="btn-clear-form">
+                            🧹 Clear Form
+                        </button>
+
+                        <!-- Shown only during Edit so user can choose not to update -->
+                        <button type="button" id="btnCancelEdit" onclick="cancelEditWithoutUpdating()" class="btn-cancel-edit is-hidden">
+                            ↩ Don't Update (Cancel)
+                        </button>
+
+                        <button type="submit" id="submitBtn" class="btn-submit">✅ Save New Student</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const TEGHRA_BLOCKS = {
+        "Teghra": [
+            "Pidhauli", "Ratgawn", "Adharur", "Gaura-1", "Gaura-2",
+            "Dhankaul", "Chilhay", "Pipra Dodraj", "Barauni-1",
+            "Barauni-2", "Barauni-3 / Malhipur", "Pakathaul", "Rajwara"
+        ],
+        "Bachhwara": [
+            "Arwa", "Bachhwara", "Bhikhamchak", "Bisanpur", "Chamtha-I",
+            "Chamtha-II", "Chamtha-III", "Chiranjipur", "Dadpur", "Fateha",
+            "Godhana", "Govindpur-III", "Kaidarabad", "Rani-I", "Rani-II",
+            "Rani-III", "Rasidpur", "Rudouli"
+        ],
+        "Bhagwanpur": [
+            "Lakhanpur", "Kiratpur", "Maheshpur", "Mahedauli", "Damodarpur",
+            "Kazi Rasulpur", "Takia", "Mokhtiyarpur", "Madhepura", "Khanjahanpur Pali"
+        ],
+        "Mansoorchak": []
+    };
+
+    const PHOTO_MAX_BYTES = {{ photo_actual_max_kb }} * 1024;    // 600 KB enforced
+    const AADHAAR_MAX_BYTES = {{ aadhaar_max_kb }} * 1024;  // 700 KB enforced
+    const HAS_ACTIVE_QUERY = {{ 'true' if (search_executed and search_q) else 'false' }};
+
+    function showPopup(type, message) {
+        const modal = document.getElementById("statusPopupModal");
+        const card = document.getElementById("statusPopupCard");
+        const title = document.getElementById("statusPopupTitle");
+        const text = document.getElementById("statusPopupText");
+        const btn = document.getElementById("statusPopupBtn");
+        if (!modal || !card || !title || !text || !btn) {
+            alert(message);
+            return;
+        }
+        const isErr = (type === "error");
+        card.className = "popup-card " + (isErr ? "is-error" : "is-success");
+        title.className = "popup-title " + (isErr ? "is-error" : "is-success");
+        btn.className = "btn-popup-ok " + (isErr ? "is-error" : "is-success");
+        title.innerText = isErr ? "⚠️ Validation Error" : "✓ Notice";
+        text.innerText = message;
+        modal.classList.remove("is-hidden");
+    }
+
+    function closeStatusPopup() {
+        const modal = document.getElementById("statusPopupModal");
+        if (modal) modal.classList.add("is-hidden");
+    }
+
+    function expandFormContainer() {
+        document.getElementById("formShowcaseBanner").classList.add("is-hidden");
+        document.getElementById("studentFormWrapper").classList.remove("is-hidden");
+    }
+
+    function collapseFormSection() {
+        document.getElementById("studentFormWrapper").classList.add("is-hidden");
+        document.getElementById("formShowcaseBanner").classList.remove("is-hidden");
+    }
+
+    function setFormModeButtons(isEditMode) {
+        const clearBtn = document.getElementById("btnClearForm");
+        const cancelEditBtn = document.getElementById("btnCancelEdit");
+        const badge = document.getElementById("formGroupBadge");
+        if (clearBtn) {
+            clearBtn.disabled = !!isEditMode;
+        }
+        if (cancelEditBtn) {
+            cancelEditBtn.classList.toggle("is-hidden", !isEditMode);
+        }
+        if (badge) {
+            badge.innerText = isEditMode
+                ? "✏️ Edit Student Form Group"
+                : "📝 New Student Form Group";
+        }
+    }
+
+    function clearNewStudentForm() {
+        if (document.getElementById("formAction").value !== "create_student") return;
+        document.getElementById("studentForm").reset();
+        document.getElementById("studentId").value = "";
+        document.getElementById("country").value = "India";
+        document.getElementById("state").value = "Bihar";
+        document.getElementById("district").value = "Begusarai";
+        document.getElementById("subdivision").value = "Teghra";
+        populateTeghraBlocks("");
+        syncPanchayatUI(true, "", false);
+        document.getElementById("currentPhotoLink").classList.add("is-hidden");
+        document.getElementById("currentDocLink").classList.add("is-hidden");
+    }
+
+    function cancelEditWithoutUpdating() {
+        document.getElementById("studentForm").reset();
+        document.getElementById("formAction").value = "create_student";
+        document.getElementById("studentId").value = "";
+        document.getElementById("submitBtn").innerText = "✅ Save New Student";
+        setFormModeButtons(false);
+        collapseFormSection();
+        showPopup("success", "Edit cancelled — no changes were saved.");
+    }
+
+    function openFormForNewStudent() {
+        document.getElementById("formAction").value = "create_student";
+        document.getElementById("studentId").value = "";
+        document.getElementById("submitBtn").innerText = "✅ Save New Student";
+        setFormModeButtons(false);
+        clearNewStudentForm();
+        expandFormContainer();
+    }
+
+    function openFormForEditExisting() {
+        const searchSection = document.getElementById("searchStudentCard");
+        if (searchSection) {
+            searchSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            const qInput = searchSection.querySelector('input[name="q"]');
+            if (qInput) qInput.focus();
+        }
+    }
+
+    function toggleCandidateBox() {
+        const box = document.getElementById("candidateListBox");
+        const btn = document.getElementById("btnToggleCandidateList");
+        if (!box) return;
+        const nowHidden = box.classList.toggle("is-hidden");
+        if (btn) btn.innerText = nowHidden ? "Show Results" : "Hide Results ✕";
+    }
+
+    function populateTeghraBlocks(selectedVal) {
+        const blockSelect = document.getElementById("block");
+        if (!blockSelect) return;
+        blockSelect.innerHTML = '<option value="">-- Select Block (Teghra Subdivision) --</option>';
+        Object.keys(TEGHRA_BLOCKS).forEach(function (blkName) {
+            const opt = document.createElement("option");
+            opt.value = blkName;
+            opt.textContent = blkName;
+            if (selectedVal && selectedVal === blkName) opt.selected = true;
+            blockSelect.appendChild(opt);
+        });
+    }
+
+    function syncPanchayatUI(isInitialOrEditLoad, savedPanchayatVal, showPromptPopup) {
+        const blockSelect = document.getElementById("block");
+        const panchayatSelect = document.getElementById("panchayatSelect");
+        const panchayatInput = document.getElementById("panchayatInput");
+        const panchayatHidden = document.getElementById("panchayat");
+        const villageInput = document.getElementById("village");
+        if (!blockSelect || !panchayatSelect || !panchayatInput || !panchayatHidden || !villageInput) return;
+
+        const blk = blockSelect.value;
+        const list = TEGHRA_BLOCKS[blk] || [];
+
+        if (blk === "Bhagwanpur" || blk === "Bachhwara") {
+            panchayatSelect.classList.remove("is-hidden");
+            panchayatInput.classList.add("is-hidden");
+
+            panchayatSelect.innerHTML = '<option value="">-- Select Panchayat (' + blk + ') --</option>';
+            list.forEach(function (pName) {
+                const opt = document.createElement("option");
+                opt.value = pName;
+                opt.textContent = pName;
+                if (savedPanchayatVal && savedPanchayatVal === pName) opt.selected = true;
+                panchayatSelect.appendChild(opt);
+            });
+
+            panchayatHidden.value = panchayatSelect.value || "";
+            if (showPromptPopup) {
+                showPopup("success", "Please select a Panchayat for " + blk + " block.");
+            }
+        } else {
+            panchayatSelect.classList.add("is-hidden");
+            panchayatInput.classList.remove("is-hidden");
+
+            if (isInitialOrEditLoad) {
+                panchayatInput.value = savedPanchayatVal || "";
+                panchayatHidden.value = panchayatInput.value;
+            } else {
+                panchayatInput.value = "";
+                panchayatHidden.value = "";
+                villageInput.value = "";
+            }
+        }
+    }
+
+    function loadStudentIntoForm(st) {
+        expandFormContainer();
+        document.getElementById("formAction").value = "update_student";
+        document.getElementById("studentId").value = st.id || "";
+        document.getElementById("submitBtn").innerText = "💾 Update Student Details";
+        setFormModeButtons(true);
+
+        document.getElementById("name").value = st.name || "";
+        document.getElementById("father_name").value = st.father_name || "";
+        document.getElementById("mother_name").value = st.mother_name || "";
+        document.getElementById("dob").value = st.dob || "";
+        document.getElementById("gender").value = st.gender || "";
+        document.getElementById("phone").value = st.phone || "";
+        document.getElementById("email").value = st.email || "";
+        document.getElementById("username").value = st.username || "";
+        document.getElementById("password").value = "";
+        document.getElementById("school_class").value = st.school_class || "";
+        document.getElementById("batch").value = st.batch || "Morning Batch";
+        document.getElementById("status").value = st.status || "Active";
+        document.getElementById("leaving_reason").value = st.leaving_reason || "";
+
+        document.getElementById("country").value = st.country || "India";
+        document.getElementById("state").value = st.state || "Bihar";
+        document.getElementById("district").value = st.district || "Begusarai";
+        document.getElementById("subdivision").value = st.subdivision || "Teghra";
+        populateTeghraBlocks(st.block || "");
+        syncPanchayatUI(true, st.panchayat || "", false);
+        document.getElementById("village").value = st.village || "";
+        document.getElementById("post").value = st.post || "";
+        document.getElementById("police_station").value = st.police_station || "";
+        document.getElementById("pincode").value = st.pincode || "";
+        document.getElementById("aadhaar").value = st.aadhaar || "";
+
+        const photoLink = document.getElementById("currentPhotoLink");
+        if (st.photo) {
+            photoLink.href = "/static/uploads/" + st.photo;
+            photoLink.classList.remove("is-hidden");
+        } else {
+            photoLink.classList.add("is-hidden");
+        }
+
+        const docLink = document.getElementById("currentDocLink");
+        if (st.aadhaar_doc) {
+            docLink.href = "/static/uploads/" + st.aadhaar_doc;
+            docLink.classList.remove("is-hidden");
+        } else {
+            docLink.classList.add("is-hidden");
+        }
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        populateTeghraBlocks("");
+        syncPanchayatUI(true, "", false);
+        setFormModeButtons(false);
+
+        const navEntries = performance.getEntriesByType && performance.getEntriesByType("navigation");
+        const isReload = navEntries && navEntries.length > 0 && navEntries[0].type === "reload";
+        if (isReload && window.location.search.includes("do_search=1")) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            document.getElementById("candidateListBox").classList.add("is-hidden");
+            document.getElementById("btnToggleCandidateList").classList.add("is-hidden");
+        } else if (HAS_ACTIVE_QUERY) {
+            document.getElementById("candidateListBox").classList.remove("is-hidden");
+            document.getElementById("btnToggleCandidateList").classList.remove("is-hidden");
+        }
+
+        document.querySelectorAll(".btn-edit-pick").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                const raw = btn.getAttribute("data-student");
+                if (raw) loadStudentIntoForm(JSON.parse(raw));
+            });
+        });
+
+        const blockSelect = document.getElementById("block");
+        const panchayatSelect = document.getElementById("panchayatSelect");
+        const panchayatInput = document.getElementById("panchayatInput");
+        const panchayatHidden = document.getElementById("panchayat");
+        const photoInput = document.getElementById("photo");
+        const aadhaarDocInput = document.getElementById("aadhaar_doc");
+        const form = document.getElementById("studentForm");
+
+        if (blockSelect) {
+            blockSelect.addEventListener("change", function () {
+                const b = blockSelect.value;
+                const promptNeeded = (b === "Bhagwanpur" || b === "Bachhwara");
+                syncPanchayatUI(false, "", promptNeeded);
+            });
+        }
+        if (panchayatSelect) {
+            panchayatSelect.addEventListener("change", function () {
+                panchayatHidden.value = panchayatSelect.value;
+            });
+        }
+        if (panchayatInput) {
+            panchayatInput.addEventListener("input", function () {
+                panchayatHidden.value = panchayatInput.value;
+            });
+        }
+        if (photoInput) {
+            photoInput.addEventListener("change", function () {
+                const f = photoInput.files && photoInput.files[0];
+                if (f && f.size > PHOTO_MAX_BYTES) {
+                    photoInput.value = "";
+                    showPopup("error", "Student Photo size (" + (f.size / 1024).toFixed(1) + " KB) exceeds maximum allowed limit of 600 KB.");
+                }
+            });
+        }
+        if (aadhaarDocInput) {
+            aadhaarDocInput.addEventListener("change", function () {
+                const f = aadhaarDocInput.files && aadhaarDocInput.files[0];
+                if (f && f.size > AADHAAR_MAX_BYTES) {
+                    aadhaarDocInput.value = "";
+                    showPopup("error", "Aadhaar Card file size (" + (f.size / 1024).toFixed(1) + " KB) exceeds maximum allowed limit of 700 KB.");
+                }
+            });
+        }
+        if (form) {
+            form.addEventListener("submit", function (e) {
+                const required = [
+                    { id: "name", label: "Student Name" },
+                    { id: "father_name", label: "Father's Name" },
+                    { id: "gender", label: "Gender" },
+                    { id: "school_class", label: "Class" },
+                    { id: "batch", label: "Batch" },
+                    { id: "country", label: "Country" },
+                    { id: "state", label: "State" },
+                    { id: "district", label: "District" },
+                    { id: "subdivision", label: "Subdivision" },
+                    { id: "block", label: "Block" },
+                    { id: "village", label: "Village" }
+                ];
+                const missing = [];
+                required.forEach(function (item) {
+                    const el = document.getElementById(item.id);
+                    if (!el || !(el.value || "").trim()) missing.push(item.label);
+                });
+
+                if (photoInput && photoInput.files && photoInput.files[0] && photoInput.files[0].size > PHOTO_MAX_BYTES) {
+                    e.preventDefault();
+                    showPopup("error", "Student Photo exceeds maximum allowed size of 600 KB.");
+                    return;
+                }
+                if (aadhaarDocInput && aadhaarDocInput.files && aadhaarDocInput.files[0] && aadhaarDocInput.files[0].size > AADHAAR_MAX_BYTES) {
+                    e.preventDefault();
+                    showPopup("error", "Aadhaar Card file exceeds maximum allowed size of 700 KB.");
+                    return;
+                }
+                if (missing.length > 0) {
+                    e.preventDefault();
+                    showPopup("error", "Mandatory fields are empty: " + missing.join(", ") + ".");
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "common/base.html" %}
+
+{% block title %}{{ student.name }} - Student Record{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { background: #f1f5f9; color: #0f172a; font-family: 'Segoe UI', system-ui, sans-serif; padding: 20px; }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    .bar { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 14px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+    .card { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 14px; padding: 20px 24px; margin-bottom: 18px; }
+    .btn { text-decoration: none; border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-block; }
+    .btn-back { background: #e2e8f0; color: #0f172a; }
+    .btn-print { background: #0f766e; color: #ffffff; }
+    .btn-save { background: #1e3c72; color: #ffffff; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+    label { display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px; }
+    input, select { width: 100%; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 8px; font-size: 13.5px; color: #0f172a; background: #ffffff; box-sizing: border-box; }
+    .alert-ok { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; font-weight: 600; }
+    .alert-err { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; font-weight: 600; }
+    @media print { .no-print { display: none !important; } body { background: #ffffff; padding: 0; } .card { border: none; box-shadow: none; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+    <div class="bar no-print">
+        <div>
+            <h2 style="margin: 0; color: #1e3c72;">{{ student.name }} (@{{ student.username }})</h2>
+            <small style="color: #475569;">Student ID #{{ student.id }} • Status: {{ student.status }}</small>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-back">&larr; Back to Dashboard</a>
+            <button type="button" onclick="window.print()" class="btn btn-print">🖨️ Print Page</button>
+        </div>
+    </div>
+
+    {% if msg %}
+    <div class="{{ 'alert-ok' if ok else 'alert-err' }}">{{ msg }}</div>
+    {% endif %}
+
+    <div class="card">
+        <h3 style="margin-top: 0; color: #1e3c72;">Student Details &amp; Edit Form</h3>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="grid-2">
+                <div>
+                    <label>Full Name</label>
+                    <input type="text" name="name" value="{{ student.name }}" required>
+                </div>
+                <div>
+                    <label>Father's Name</label>
+                    <input type="text" name="father_name" value="{{ student.father_name }}" required>
+                </div>
+                <div>
+                    <label>Gender</label>
+                    <select name="gender">
+                        <option value="Male" {% if student.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if student.gender == 'Female' %}selected{% endif %}>Female</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Class</label>
+                    <input type="text" name="school_class" value="{{ student.school_class }}" required>
+                </div>
+                <div>
+                    <label>Batch</label>
+                    <select name="batch">
+                        {% for b in batch_options %}
+                        <option value="{{ b }}" {% if student.batch == b %}selected{% endif %}>{{ b }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>Village</label>
+                    <input type="text" name="village" value="{{ student.village }}" required>
+                </div>
+                <div>
+                    <label>Block</label>
+                    <input type="text" name="block" value="{{ student.block }}" required>
+                </div>
+                <div>
+                    <label>Subdivision</label>
+                    <input type="text" name="subdivision" value="{{ student.subdivision }}" required>
+                </div>
+                <div>
+                    <label>District</label>
+                    <input type="text" name="district" value="{{ student.district }}" required>
+                </div>
+                <div>
+                    <label>State</label>
+                    <input type="text" name="state" value="{{ student.state }}" required>
+                </div>
+                <div>
+                    <label>Country</label>
+                    <input type="text" name="country" value="{{ student.country or 'India' }}" required>
+                </div>
+                <div>
+                    <label>Contact (Masked)</label>
+                    <input type="text" name="phone" value="{{ student.phone }}">
+                </div>
+            </div>
+
+            <div class="no-print" style="margin-top: 16px;">
+                <button type="submit" class="btn btn-save">Save Changes</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top: 0; color: #1e3c72;">Attendance &amp; Recent Fee Summary</h3>
+        <p style="margin: 0 0 10px; color: #334155;">
+            <strong>Attendance:</strong> Present: {{ att_summary.present_days or 0 }} • Absent: {{ att_summary.absent_days or 0 }} • Leave: {{ att_summary.leave_days or 0 }}
+        </p>
+        {% if fees %}
+        <ul style="margin: 0; padding-left: 18px; color: #334155;">
+            {% for f in fees %}
+            <li>{{ f.month_year }} — <strong>{{ f.status }}</strong> (₹{{ f.amount }})</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p style="margin: 0; color: #64748b;">No fee records found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

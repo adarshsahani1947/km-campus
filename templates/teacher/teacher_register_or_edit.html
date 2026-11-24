@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register / Edit Student — KM Campus</title>
+
+    <style id="km-common-css">
+        :root {
+            --km-bg: #eef2f6;
+            --km-surface: #ffffff;
+            --km-surface-alt: #f8fafc;
+            --km-ink: #0f172a;
+            --km-muted: #64748b;
+            --km-border: #dce3ec;
+            --km-primary: #1d4ed8;
+            --km-primary-hover: #1e40af;
+            --km-primary-soft: #eff6ff;
+            --km-success: #15803d;
+            --km-success-hover: #166534;
+            --km-success-soft: #f0fdf4;
+            --km-danger: #dc2626;
+            --km-danger-hover: #b91c1c;
+            --km-danger-soft: #fef2f2;
+            --km-amber: #d97706;
+            --km-amber-hover: #b45309;
+            --km-amber-soft: #fffbeb;
+            --km-radius: 12px;
+            --km-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--km-bg);
+            color: var(--km-ink);
+            line-height: 1.45;
+            padding-bottom: 64px;
+        }
+
+        .km-topbar {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            padding: 15px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: 0 2px 12px rgba(15, 23, 42, 0.14);
+        }
+        .km-topbar h1 { font-size: 1.18rem; font-weight: 700; letter-spacing: -0.01em; }
+        .km-topbar p { font-size: 0.82rem; color: #cbd5e1; margin-top: 2px; }
+        .km-topbar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .km-container {
+            max-width: 1120px;
+            margin: 20px auto;
+            padding: 0 14px;
+        }
+
+        .km-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 13px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: transform 0.12s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .km-btn:active:not(:disabled) { transform: scale(0.98); }
+        .km-btn-sm { padding: 6px 11px; font-size: 0.79rem; }
+        .km-btn-dark { background: rgba(255, 255, 255, 0.08); color: #f8fafc; border-color: rgba(255, 255, 255, 0.18); }
+        .km-btn-dark:hover { background: rgba(255, 255, 255, 0.16); }
+
+        .km-btn-primary {
+            background: var(--km-primary);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(29, 78, 216, 0.22);
+        }
+        .km-btn-primary:hover { background: var(--km-primary-hover); }
+
+        .km-btn-success {
+            background: var(--km-success);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(21, 128, 61, 0.25);
+        }
+        .km-btn-success:hover { background: var(--km-success-hover); }
+
+        .km-btn-warning {
+            background: var(--km-amber);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(217, 119, 6, 0.24);
+        }
+        .km-btn-warning:hover { background: var(--km-amber-hover); }
+
+        .km-btn-danger {
+            background: var(--km-danger);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.24);
+        }
+        .km-btn-danger:hover { background: var(--km-danger-hover); }
+
+        .km-btn-outline { background: #ffffff; color: var(--km-ink); border-color: var(--km-border); }
+        .km-btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .km-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        .km-flash {
+            padding: 12px 16px;
+            border-radius: var(--km-radius);
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid;
+            box-shadow: var(--km-shadow);
+        }
+        .km-flash.success { background: var(--km-success-soft); color: var(--km-success); border-color: #bbf7d0; }
+        .km-flash.error { background: var(--km-danger-soft); color: var(--km-danger); border-color: #fecaca; }
+
+        /* Two Top Mode Cards */
+        .km-mode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+        .km-mode-card {
+            background: var(--km-surface);
+            border: 2px solid var(--km-border);
+            border-radius: var(--km-radius);
+            padding: 16px 18px;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: var(--km-shadow);
+            transition: all 0.16s ease;
+        }
+        .km-mode-card:hover {
+            border-color: #93c5fd;
+            transform: translateY(-1px);
+        }
+        .km-mode-card.active {
+            border-color: var(--km-primary);
+            background: linear-gradient(180deg, #ffffff 0%, var(--km-primary-soft) 100%);
+            box-shadow: 0 4px 14px rgba(29, 78, 216, 0.14);
+        }
+        .km-mode-title { font-size: 1.02rem; font-weight: 700; color: var(--km-ink); }
+        .km-mode-sub { font-size: 0.8rem; color: var(--km-muted); margin-top: 3px; }
+        .km-mode-pill {
+            padding: 5px 11px;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            background: #e2e8f0;
+            color: #1e293b;
+            white-space: nowrap;
+        }
+        .km-mode-card.active .km-mode-pill { background: var(--km-primary); color: #ffffff; }
+
+        .km-card {
+            background: var(--km-surface);
+            border: 1px solid var(--km-border);
+            border-radius: var(--km-radius);
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: var(--km-shadow);
+        }
+        .km-card-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid var(--km-border);
+        }
+        .km-card-head h2 { font-size: 1.02rem; font-weight: 700; }
+
+        .km-form-section {
+            background: #ffffff;
+            border: 1px solid var(--km-border);
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 12px;
+        }
+        .km-form-section:first-of-type { margin-top: 0; }
+
+        .km-section-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--km-primary);
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px dashed var(--km-border);
+        }
+
+        /* Photo Section Layout */
+        .km-photo-box {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px;
+        }
+        .km-photo-preview {
+            width: 58px;
+            height: 58px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid var(--km-border);
+            background: #f1f5f9;
+            flex-shrink: 0;
+        }
+        .km-photo-placeholder {
+            width: 58px;
+            height: 58px;
+            border-radius: 10px;
+            background: var(--km-primary-soft);
+            color: var(--km-primary);
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed #93c5fd;
+            flex-shrink: 0;
+        }
+        .km-photo-input-wrap {
+            flex: 1 1 220px;
+        }
+
+        /* Dynamic Toolbar (Search + Batch Filter + Per-List Count) */
+        .km-toolbar {
+            background: var(--km-surface);
+            border: 1px solid var(--km-border);
+            border-radius: var(--km-radius);
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            box-shadow: var(--km-shadow);
+        }
+        .km-search-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            flex: 1 1 320px;
+        }
+        .km-search-input {
+            padding: 7px 11px;
+            border: 1px solid var(--km-border);
+            border-radius: 8px;
+            font-size: 0.86rem;
+            min-width: 180px;
+            flex: 1 1 180px;
+            background: #ffffff;
+            color: var(--km-ink);
+        }
+        .km-search-input:focus,
+        .km-filter-controls select:focus,
+        .km-field input:focus,
+        .km-field select:focus {
+            outline: none;
+            border-color: var(--km-primary);
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+        }
+        .km-filter-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            color: #334155;
+        }
+        .km-filter-controls select {
+            padding: 6px 9px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 0.82rem;
+            background: #ffffff;
+            color: var(--km-ink);
+        }
+
+        /* Compact Mobile-Friendly List */
+        .km-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .km-list-item {
+            background: var(--km-surface);
+            border: 1px solid var(--km-border);
+            border-radius: var(--km-radius);
+            overflow: hidden;
+            box-shadow: var(--km-shadow);
+            transition: border-color 0.15s ease;
+        }
+        .km-list-item.is-editing {
+            border-color: var(--km-primary);
+        }
+        .km-list-row {
+            padding: 11px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .km-compact-info {
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+        .km-title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .km-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--km-ink);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .km-dirty-tag {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 999px;
+            background: var(--km-amber-soft);
+            color: var(--km-amber);
+            border: 1px solid #fde68a;
+            white-space: nowrap;
+        }
+        .km-compact-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .km-pill {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #334155;
+        }
+        .km-pill-ok { background: var(--km-success-soft); color: var(--km-success); }
+        .km-pill-warn { background: var(--km-amber-soft); color: var(--km-amber); }
+
+        /* Expanded Edit Drawer */
+        .km-review-drawer {
+            background: var(--km-surface-alt);
+            border-top: 1px solid var(--km-border);
+            padding: 16px;
+        }
+        .km-drawer-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .km-drawer-head h3 { font-size: 0.95rem; font-weight: 700; }
+
+        .km-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .km-field label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        .km-field input,
+        .km-field select {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 0.85rem;
+            background: #ffffff;
+            color: var(--km-ink);
+        }
+
+        /* Distinct Save Edit Footer Bar */
+        .km-drawer-footer {
+            margin-top: 14px;
+            padding: 12px 14px;
+            background: #ffffff;
+            border: 1px solid var(--km-border);
+            border-radius: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .km-drawer-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+        .km-sub { font-size: 0.8rem; color: var(--km-muted); }
+
+        /* Centered Pagination Strip: << < 1, 2, 3 > >> */
+        .km-pager-wrap {
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .km-pager-nav {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .km-page-num {
+            min-width: 34px;
+            height: 32px;
+            padding: 0 8px;
+            border-radius: 7px;
+            border: 1px solid var(--km-border);
+            background: #ffffff;
+            color: var(--km-ink);
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.12s ease;
+        }
+        .km-page-num:hover:not(:disabled) {
+            background: #f8fafc;
+            border-color: #93c5fd;
+        }
+        .km-page-num.active {
+            background: var(--km-primary);
+            border-color: var(--km-primary);
+            color: #ffffff;
+        }
+        .km-page-num:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .km-empty {
+            background: var(--km-surface);
+            border: 1px dashed #cbd5e1;
+            border-radius: var(--km-radius);
+            padding: 32px 18px;
+            text-align: center;
+            color: var(--km-muted);
+            box-shadow: var(--km-shadow);
+        }
+        .km-empty h3 { color: var(--km-ink); font-size: 0.98rem; margin-bottom: 4px; }
+        .km-hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<!-- =====================================================================
+     TOP BAR
+     ===================================================================== -->
+<header class="km-topbar">
+    <div>
+        <h1>Register / Edit Student</h1>
+        <p>{{ teacher_name or 'Teacher' }} • {{ students|length }} enrolled records</p>
+    </div>
+    <div class="km-topbar-actions">
+        <a href="{{ url_for('teacher_dashboard') }}" class="km-btn km-btn-dark">← Return to Dashboard</a>
+        <a href="{{ url_for('teacher_registrations') }}" class="km-btn km-btn-primary">Approve Pending</a>
+    </div>
+</header>
+
+<main class="km-container">
+
+    {% if msg %}
+    <div class="km-flash {{ 'success' if ok else 'error' }}">{{ msg }}</div>
+    {% endif %}
+
+    <!-- ================================================================= -->
+    <!-- TWO TOP CARDS: + REGISTER NEW STUDENT & EDIT EXISTING STUDENT     -->
+    <!-- ================================================================= -->
+    <section class="km-mode-grid">
+        <button type="button" class="km-mode-card" id="km-card-register" onclick="kmSelectMode('register')">
+            <div>
+                <div class="km-mode-title">+ Register New Student</div>
+                <div class="km-mode-sub">Open registration form directly</div>
+            </div>
+            <span class="km-mode-pill">New Form</span>
+        </button>
+
+        <button type="button" class="km-mode-card" id="km-card-edit" onclick="kmSelectMode('edit')">
+            <div>
+                <div class="km-mode-title">Edit Existing Student</div>
+                <div class="km-mode-sub">Alphabetical list (7 at a time)</div>
+            </div>
+            <span class="km-mode-pill">{{ students|length }}</span>
+        </button>
+    </section>
+
+    <div id="km-idle-prompt" class="km-empty">
+        <h3>Select an Option Above</h3>
+        <p>Tap <strong>+ Register New Student</strong> to enter details, or <strong>Edit Existing Student</strong> to view the list.</p>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- PANEL 1: + REGISTER NEW STUDENT FORM (HIDDEN UNTIL CLICKED)       -->
+    <!-- ================================================================= -->
+    <section id="km-panel-register" class="km-card km-hidden">
+        <div class="km-card-head">
+            <h2>New Student Registration</h2>
+            <button type="button" class="km-btn km-btn-sm km-btn-danger" onclick="kmSelectMode(null)">Close</button>
+        </div>
+
+        <form method="POST" action="{{ url_for('teacher_register_or_edit') }}" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="create_student">
+
+            <!-- Section 1: Student & Guardian Details -->
+            <div class="km-form-section">
+                <div class="km-section-label">1. Student &amp; Guardian Details</div>
+                <div class="km-form-grid">
+                    <div class="km-field">
+                        <label>Student Name *</label>
+                        <input type="text" name="name" required>
+                    </div>
+                    <div class="km-field">
+                        <label>Father's Name *</label>
+                        <input type="text" name="father_name" required>
+                    </div>
+                    <div class="km-field">
+                        <label>Mother's Name</label>
+                        <input type="text" name="mother_name">
+                    </div>
+                    <div class="km-field">
+                        <label>Date of Birth</label>
+                        <input type="date" name="dob">
+                    </div>
+                    <div class="km-field">
+                        <label>Gender</label>
+                        <select name="gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="km-field">
+                        <label>Mobile Number *</label>
+                        <input type="text" name="phone" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Class, Batch & Fee -->
+            <div class="km-form-section">
+                <div class="km-section-label">2. Class, Batch &amp; Fee</div>
+                <div class="km-form-grid">
+                    <div class="km-field">
+                        <label>Class *</label>
+                        <input type="text" name="school_class" required>
+                    </div>
+                    <div class="km-field">
+                        <label>Batch *</label>
+                        <select name="batch">
+                            {% for b in (batch_options or ['Morning Batch', 'Evening Batch']) %}
+                            <option value="{{ b }}">{{ b }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="km-field">
+                        <label>Monthly Fee (₹)</label>
+                        <input type="number" name="monthly_fee" min="0" step="1">
+                    </div>
+                    <div class="km-field">
+                        <label>Admission Date</label>
+                        <input type="date" name="admission_date" value="{{ today_str or '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Address Details (Separated) -->
+            <div class="km-form-section">
+                <div class="km-section-label">3. Address Details</div>
+                <div class="km-form-grid">
+                    <div class="km-field">
+                        <label>Village *</label>
+                        <input type="text" name="village" required>
+                    </div>
+                    <div class="km-field">
+                        <label>Post Office</label>
+                        <input type="text" name="post">
+                    </div>
+                    <div class="km-field">
+                        <label>Block *</label>
+                        <input type="text" name="block" required>
+                    </div>
+                    <div class="km-field">
+                        <label>Subdivision *</label>
+                        <input type="text" name="subdivision" required>
+                    </div>
+                    <div class="km-field">
+                        <label>District *</label>
+                        <input type="text" name="district" required>
+                    </div>
+                    <div class="km-field">
+                        <label>State *</label>
+                        <input type="text" name="state" value="Bihar" required>
+                    </div>
+                    <div class="km-field">
+                        <label>Country *</label>
+                        <input type="text" name="country" value="India" required>
+                    </div>
+                    <div class="km-field">
+                        <label>PIN Code</label>
+                        <input type="text" name="pincode">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Student Photo (Separated) -->
+            <div class="km-form-section">
+                <div class="km-section-label">4. Student Photo</div>
+                <div class="km-photo-box">
+                    <div class="km-photo-placeholder">IMG</div>
+                    <div class="km-field km-photo-input-wrap">
+                        <label>Upload Passport / Profile Photo</label>
+                        <input type="file" name="photo" accept="image/*">
+                    </div>
+                </div>
+            </div>
+
+            <div class="km-drawer-footer">
+                <span class="km-sub">Registered by: <strong>{{ teacher_name or 'Teacher' }}</strong></span>
+                <div class="km-drawer-actions">
+                    <button type="reset" class="km-btn km-btn-sm km-btn-warning">Reset</button>
+                    <button type="button" class="km-btn km-btn-sm km-btn-danger" onclick="kmSelectMode(null)">Close</button>
+                    <button type="submit" class="km-btn km-btn-sm km-btn-success">Register Student</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- PANEL 2: EDIT EXISTING STUDENT (HIDDEN UNTIL CLICKED)             -->
+    <!-- ================================================================= -->
+    <section id="km-panel-edit" class="km-hidden">
+
+        <div class="km-toolbar">
+            <div class="km-search-group">
+                <input type="text" id="kmEditSearchInput" class="km-search-input"
+                       value="{{ search_q or '' }}"
+                       placeholder="Search name, class, batch, teacher..."
+                       onkeydown="if (event.key === 'Enter') { event.preventDefault(); kmApplyEditSearch(); }">
+                <button type="button" class="km-btn km-btn-sm km-btn-primary" onclick="kmApplyEditSearch()">Search</button>
+                <button type="button" class="km-btn km-btn-sm km-btn-danger km-hidden" id="kmEditClearBtn" onclick="kmClearEditSearch()">Clear</button>
+            </div>
+
+            <div class="km-filter-controls">
+                <label for="kmBatchFilter"><strong>Batch:</strong></label>
+                <select id="kmBatchFilter" onchange="kmApplyEditSearch()">
+                    <option value="">All Batches</option>
+                    {% for b in (batch_options or ['Morning Batch', 'Evening Batch']) %}
+                    <option value="{{ b|lower }}">{{ b }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="kmPageSizeSelect"><strong>Per list:</strong></label>
+                <select id="kmPageSizeSelect" onchange="kmChangePageSize()">
+                    <option value="7" selected>7</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </div>
+
+        {% if students %}
+        <!-- Compact Alphabetical Student List (A -> Z) -->
+        <div class="km-list" id="kmExistingStudentList">
+            {% for st in students|sort(attribute='name', case_sensitive=False) %}
+            <div class="km-list-item km-student-record"
+                 id="student-card-{{ st.id }}"
+                 data-name="{{ (st.name or '')|lower }}"
+                 data-batch="{{ (st.batch or 'Morning Batch')|lower }}"
+                 data-search="{{ (st.name ~ ' ' ~ st.father_name ~ ' ' ~ st.school_class ~ ' ' ~ st.batch ~ ' ' ~ (st.registered_by_teacher or ''))|lower }}">
+
+                <!-- Compact Mobile Row -->
+                <div class="km-list-row">
+                    <div class="km-compact-info">
+                        <div class="km-title-row">
+                            <span class="km-title">{{ st.name }}</span>
+                            <span class="km-dirty-tag km-hidden" id="dirty-badge-{{ st.id }}">Unsaved Edit</span>
+                        </div>
+                        <div class="km-compact-meta">
+                            <span class="km-pill">{{ st.school_class or 'N/A' }}</span>
+                            <span class="km-pill">{{ st.batch or 'Morning Batch' }}</span>
+                            <span class="km-pill {{ 'km-pill-ok' if (st.status or 'Active') in ('Approved', 'Active') else 'km-pill-warn' }}">
+                                {{ st.status or 'Active' }}
+                            </span>
+                            <span class="km-pill">By: {{ st.registered_by_teacher or 'Self' }}</span>
+                        </div>
+                    </div>
+
+                    <button type="button" class="km-btn km-btn-sm km-btn-primary"
+                            onclick="kmToggleEditDrawer('edit-drawer-{{ st.id }}', '{{ st.id }}')">
+                        Edit
+                    </button>
+                </div>
+
+                <!-- Expandable Edit Drawer -->
+                <div id="edit-drawer-{{ st.id }}" class="km-review-drawer km-hidden">
+                    <div class="km-drawer-head">
+                        <h3>Editing: {{ st.name }}</h3>
+                        <span class="km-sub">Registered by: {{ st.registered_by_teacher or 'Self' }}</span>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('teacher_register_or_edit') }}"
+                          enctype="multipart/form-data" id="edit-form-{{ st.id }}"
+                          oninput="kmMarkDirty('{{ st.id }}')">
+                        <input type="hidden" name="action" value="update_student">
+                        <input type="hidden" name="student_id" value="{{ st.id }}">
+
+                        <!-- Section 1: Student & Guardian Details -->
+                        <div class="km-form-section">
+                            <div class="km-section-label">1. Student &amp; Guardian Details</div>
+                            <div class="km-form-grid">
+                                <div class="km-field">
+                                    <label>Student Name *</label>
+                                    <input type="text" name="name" value="{{ st.name }}" required>
+                                </div>
+                                <div class="km-field">
+                                    <label>Father's Name *</label>
+                                    <input type="text" name="father_name" value="{{ st.father_name }}" required>
+                                </div>
+                                <div class="km-field">
+                                    <label>Mother's Name</label>
+                                    <input type="text" name="mother_name" value="{{ st.mother_name }}">
+                                </div>
+                                <div class="km-field">
+                                    <label>Date of Birth</label>
+                                    <input type="text" name="dob" value="{{ st.dob }}">
+                                </div>
+                                <div class="km-field">
+                                    <label>Gender</label>
+                                    <select name="gender">
+                                        <option value="Male" {% if st.gender == 'Male' %}selected{% endif %}>Male</option>
+                                        <option value="Female" {% if st.gender == 'Female' %}selected{% endif %}>Female</option>
+                                        <option value="Other" {% if st.gender == 'Other' %}selected{% endif %}>Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Class, Batch, Fee & Status -->
+                        <div class="km-form-section">
+                            <div class="km-section-label">2. Class, Batch, Fee &amp; Status</div>
+                            <div class="km-form-grid">
+                                <div class="km-field">
+                                    <label>Class *</label>
+                                    <input type="text" name="school_class" value="{{ st.school_class }}" required>
+                                </div>
+                                <div class="km-field">
+                                    <label>Batch *</label>
+                                    <input type="text" name="batch" value="{{ st.batch or 'Morning Batch' }}" required>
+                                </div>
+                                <div class="km-field">
+                                    <label>Monthly Fee (₹)</label>
+                                    <input type="number" name="monthly_fee" min="0" step="1" value="{{ st.monthly_fee or 0 }}">
+                                </div>
+                                <div class="km-field">
+                                    <label>Status</label>
+                                    <select name="status">
+                                        <option value="Approved" {% if st.status == 'Approved' %}selected{% endif %}>Approved</option>
+                                        <option value="Active" {% if st.status == 'Active' %}selected{% endif %}>Active</option>
+                                        <option value="Pending" {% if st.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                        <option value="Inactive" {% if st.status == 'Inactive' %}selected{% endif %}>Inactive</option>
+                                    </select>
+                                </div>
+                                <div class="km-field">
+                                    <label>Registered By</label>
+                                    <input type="text" value="{{ st.registered_by_teacher or 'Self' }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Address Details (Separated) -->
+                        <div class="km-form-section">
+                            <div class="km-section-label">3. Address Details</div>
+                            <div class="km-form-grid">
+                                <div class="km-field">
+                                    <label>Village *</label>
+                                    <input type="text" name="village" value="{{ st.village }}" required>
+                                </div>
+                                <div class="km-field">
+                                    <label>Post Office</label>
+                                    <input type="text" name="post" value="{{ st.post }}">
+                                </div>
+                                <div class="km-field">
+                                    <label>Block *</label>
+                                    <input type="text" name="block" value="{{ st.block }}" required>
+                                </div>
+                                <div class="km-field">
+                                    <label>Subdivision *</label>
+                                    <input type="text" name="subdivision" value="{{ st.subdivision }}" required>
+                                </div>
+                                <div class="km-field">
+                                    <label>District *</label>
+                                    <input type="text" name="district" value="{{ st.district }}" required>
+                                </div>
+                                <div class="km-field">
+                                    <label>State *</label>
+                                    <input type="text" name="state" value="{{ st.state }}" required>
+                                </div>
+                                <div class="km-field">
+                                    <label>Country *</label>
+                                    <input type="text" name="country" value="{{ st.country or 'India' }}" required>
+                                </div>
+                                <div class="km-field">
+                                    <label>PIN Code</label>
+                                    <input type="text" name="pincode" value="{{ st.pincode }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 4: Student Photo (Separated) -->
+                        <div class="km-form-section">
+                            <div class="km-section-label">4. Student Photo</div>
+                            <div class="km-photo-box">
+                                {% if st.photo %}
+                                <img class="km-photo-preview" src="{{ url_for('static', filename='uploads/' ~ st.photo) }}" alt="{{ st.name }}">
+                                {% else %}
+                                <div class="km-photo-placeholder">{{ (st.name[:1] or 'S')|upper }}</div>
+                                {% endif %}
+                                <div class="km-field km-photo-input-wrap">
+                                    <label>Replace Photo (Optional)</label>
+                                    <input type="file" name="photo" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dedicated Save Edit Footer Bar -->
+                        <div class="km-drawer-footer">
+                            <span class="km-sub">Save updated details for <strong>{{ st.name }}</strong></span>
+                            <div class="km-drawer-actions">
+                                <button type="reset" class="km-btn km-btn-sm km-btn-warning"
+                                        onclick="kmClearDirty('{{ st.id }}')">Reset</button>
+                                <button type="button" class="km-btn km-btn-sm km-btn-danger"
+                                        onclick="kmToggleEditDrawer('edit-drawer-{{ st.id }}', '{{ st.id }}')">Close</button>
+                                <button type="submit" class="km-btn km-btn-sm km-btn-success">Save Edit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div id="kmNoSearchMatch" class="km-empty km-hidden">
+            <h3>No Matching Students</h3>
+            <p>Change your filter or tap <strong>Clear</strong> to view all students.</p>
+        </div>
+
+        <!-- Centered Jump Numbers: << < 1, 2, 3 > >> -->
+        <div class="km-pager-wrap" id="kmPagerWrap">
+            <div class="km-pager-nav" id="kmPagerNav"></div>
+            <div class="km-sub" id="kmPagerInfo"></div>
+        </div>
+        {% else %}
+        <div class="km-empty">
+            <h3>No Students Found</h3>
+            <p>Tap <strong>+ Register New Student</strong> to add a student.</p>
+        </div>
+        {% endif %}
+    </section>
+
+</main>
+
+<script>
+    var kmCurrentMode = null;
+    var kmCurrentPage = 1;
+    var kmPageSize = 7;
+    var kmActiveQuery = "";
+    var kmActiveBatch = "";
+
+    function kmSelectMode(mode) {
+        kmCurrentMode = mode;
+
+        var regCard = document.getElementById("km-card-register");
+        var editCard = document.getElementById("km-card-edit");
+        if (regCard) regCard.classList.toggle("active", mode === "register");
+        if (editCard) editCard.classList.toggle("active", mode === "edit");
+
+        document.getElementById("km-idle-prompt").classList.toggle("km-hidden", Boolean(mode));
+        document.getElementById("km-panel-register").classList.toggle("km-hidden", mode !== "register");
+        document.getElementById("km-panel-edit").classList.toggle("km-hidden", mode !== "edit");
+
+        if (mode === "edit") {
+            kmRenderStudentPage();
+        }
+    }
+
+    function kmGetSortedRecords() {
+        var list = document.getElementById("kmExistingStudentList");
+        if (!list) return [];
+        var items = Array.prototype.slice.call(list.querySelectorAll(".km-student-record"));
+        items.sort(function (a, b) {
+            var nameA = (a.getAttribute("data-name") || "").trim();
+            var nameB = (b.getAttribute("data-name") || "").trim();
+            return nameA.localeCompare(nameB, undefined, { sensitivity: "base" });
+        });
+        items.forEach(function (el) { list.appendChild(el); });
+        return items;
+    }
+
+    function kmApplyEditSearch() {
+        var input = document.getElementById("kmEditSearchInput");
+        var batchSel = document.getElementById("kmBatchFilter");
+        kmActiveQuery = (input ? input.value : "").trim().toLowerCase();
+        kmActiveBatch = (batchSel ? batchSel.value : "").trim().toLowerCase();
+
+        var clearBtn = document.getElementById("kmEditClearBtn");
+        if (clearBtn) {
+            clearBtn.classList.toggle("km-hidden", !kmActiveQuery && !kmActiveBatch);
+        }
+        kmCurrentPage = 1;
+        kmRenderStudentPage();
+    }
+
+    function kmClearEditSearch() {
+        var input = document.getElementById("kmEditSearchInput");
+        var batchSel = document.getElementById("kmBatchFilter");
+        if (input) input.value = "";
+        if (batchSel) batchSel.value = "";
+        kmActiveQuery = "";
+        kmActiveBatch = "";
+
+        var clearBtn = document.getElementById("kmEditClearBtn");
+        if (clearBtn) clearBtn.classList.add("km-hidden");
+        if (input) input.focus();
+
+        kmCurrentPage = 1;
+        kmRenderStudentPage();
+    }
+
+    function kmChangePageSize() {
+        var sel = document.getElementById("kmPageSizeSelect");
+        kmPageSize = parseInt(sel ? sel.value : "7", 10) || 7;
+        kmCurrentPage = 1;
+        kmRenderStudentPage();
+    }
+
+    function kmGoToPage(pageNum, totalPages) {
+        var target = parseInt(pageNum, 10) || 1;
+        if (target < 1) target = 1;
+        if (target > totalPages) target = totalPages;
+        kmCurrentPage = target;
+        kmRenderStudentPage();
+    }
+
+    function kmMakePageBtn(label, targetPage, totalPages, isActive, isDisabled) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "km-page-num" + (isActive ? " active" : "");
+        btn.textContent = label;
+        btn.disabled = Boolean(isDisabled);
+        btn.onclick = function () {
+            kmGoToPage(targetPage, totalPages);
+        };
+        return btn;
+    }
+
+    function kmBuildCenteredPager(totalPages, totalMatched, startIdx, endIdx) {
+        var nav = document.getElementById("kmPagerNav");
+        var info = document.getElementById("kmPagerInfo");
+        if (!nav) return;
+        nav.innerHTML = "";
+
+        if (totalMatched === 0) {
+            if (info) info.textContent = "";
+            return;
+        }
+
+        nav.appendChild(kmMakePageBtn("<<", 1, totalPages, false, kmCurrentPage <= 1));
+        nav.appendChild(kmMakePageBtn("<", kmCurrentPage - 1, totalPages, false, kmCurrentPage <= 1));
+
+        var windowSize = 5;
+        var startPage = Math.max(1, kmCurrentPage - Math.floor(windowSize / 2));
+        var endPage = Math.min(totalPages, startPage + windowSize - 1);
+        if (endPage - startPage + 1 < windowSize) {
+            startPage = Math.max(1, endPage - windowSize + 1);
+        }
+
+        for (var p = startPage; p <= endPage; p++) {
+            nav.appendChild(kmMakePageBtn(String(p), p, totalPages, p === kmCurrentPage, false));
+        }
+
+        nav.appendChild(kmMakePageBtn(">", kmCurrentPage + 1, totalPages, false, kmCurrentPage >= totalPages));
+        nav.appendChild(kmMakePageBtn(">>", totalPages, totalPages, false, kmCurrentPage >= totalPages));
+
+        if (info) {
+            info.textContent = "List " + kmCurrentPage + " of " + totalPages + " (" + (startIdx + 1) + "–" + endIdx + " of " + totalMatched + ")";
+        }
+    }
+
+    function kmRenderStudentPage() {
+        var allRecords = kmGetSortedRecords();
+        if (!allRecords.length) return;
+
+        var matched = [];
+        allRecords.forEach(function (el) {
+            var haystack = el.getAttribute("data-search") || "";
+            var rowBatch = el.getAttribute("data-batch") || "";
+            var matchesQuery = !kmActiveQuery || haystack.includes(kmActiveQuery);
+            var matchesBatch = !kmActiveBatch || rowBatch === kmActiveBatch;
+            el.classList.add("km-hidden");
+            if (matchesQuery && matchesBatch) matched.push(el);
+        });
+
+        var totalMatched = matched.length;
+        var totalPages = Math.max(1, Math.ceil(totalMatched / kmPageSize));
+        if (kmCurrentPage < 1) kmCurrentPage = 1;
+        if (kmCurrentPage > totalPages) kmCurrentPage = totalPages;
+
+        var startIdx = (kmCurrentPage - 1) * kmPageSize;
+        var endIdx = Math.min(startIdx + kmPageSize, totalMatched);
+
+        for (var i = startIdx; i < endIdx; i++) {
+            matched[i].classList.remove("km-hidden");
+        }
+
+        var emptyBox = document.getElementById("kmNoSearchMatch");
+        var pagerWrap = document.getElementById("kmPagerWrap");
+        if (emptyBox) emptyBox.classList.toggle("km-hidden", totalMatched > 0);
+        if (pagerWrap) pagerWrap.classList.toggle("km-hidden", totalMatched === 0);
+
+        kmBuildCenteredPager(totalPages, totalMatched, startIdx, endIdx);
+    }
+
+    function kmMarkDirty(studentId) {
+        var badge = document.getElementById("dirty-badge-" + studentId);
+        if (badge) badge.classList.remove("km-hidden");
+    }
+
+    function kmClearDirty(studentId) {
+        var badge = document.getElementById("dirty-badge-" + studentId);
+        if (badge) badge.classList.add("km-hidden");
+    }
+
+    function kmToggleEditDrawer(drawerId, studentId) {
+        var target = document.getElementById(drawerId);
+        if (!target) return;
+        var willOpen = target.classList.contains("km-hidden");
+
+        document.querySelectorAll(".km-review-drawer").forEach(function (drawer) {
+            drawer.classList.add("km-hidden");
+        });
+        document.querySelectorAll(".km-student-record").forEach(function (card) {
+            card.classList.remove("is-editing");
+        });
+
+        if (willOpen) {
+            target.classList.remove("km-hidden");
+            var parentCard = document.getElementById("student-card-" + studentId);
+            if (parentCard) parentCard.classList.add("is-editing");
+            target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+    }
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            document.querySelectorAll(".km-review-drawer").forEach(function (drawer) {
+                drawer.classList.add("km-hidden");
+            });
+            document.querySelectorAll(".km-student-record").forEach(function (card) {
+                card.classList.remove("is-editing");
+            });
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var clearBtn = document.getElementById("kmEditClearBtn");
+        var input = document.getElementById("kmEditSearchInput");
+        if (input && input.value.trim()) {
+            kmActiveQuery = input.value.trim().toLowerCase();
+            if (clearBtn) clearBtn.classList.remove("km-hidden");
+        }
+
+        var returnMode = "{{ active_mode or '' }}";
+        if (returnMode === "register" || returnMode === "edit") {
+            kmSelectMode(returnMode);
+        }
+    });
+</script>
+</body>
+</html>

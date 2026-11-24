@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - KM Campus Banwaripur</title>
+    <style>
+        :root { 
+            --primary: #2575fc; 
+            --secondary: #6a11cb; 
+            --success: #27ae60; 
+            --danger: #e74c3c; 
+            --warning: #f59e0b; 
+            --dark: #1e3c72;
+            --bg-light: #f8fafc;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 25px; background: #f0f4f8; color: #333; }
+        .container { max-width: 960px; margin: auto; }
+
+        /* Header Bar */
+        .header-bar { background: #ffffff; padding: 22px 28px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; border: 1px solid #e2e8f0; }
+        .header-bar h2 { margin: 0; color: var(--dark); font-size: 24px; font-weight: 700; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        
+        .timer-badge { background: #fef3c7; color: #92400e; padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #fde68a; display: flex; align-items: center; gap: 6px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
+        .logout-btn { background: var(--danger); color: white; padding: 9px 18px; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: bold; transition: all 0.2s; box-shadow: 0 4px 12px rgba(231, 76, 60, 0.25); }
+        .logout-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* Status Tracking Banners */
+        .status-banner-pending {
+            background: #fffbeb; border: 1.5px solid #fde68a; color: #b45309;
+            padding: 16px 22px; border-radius: 12px; margin-bottom: 20px;
+            font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.08);
+        }
+        .status-banner-active {
+            background: #f0fdf4; border: 1.5px solid #bbf7d0; color: #166534;
+            padding: 16px 22px; border-radius: 12px; margin-bottom: 20px;
+            font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.08);
+        }
+
+        /* Alerts */
+        .alert { padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; font-weight: 600; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background: #fadbd8; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Progress Card */
+        .progress-card { background: #ffffff; padding: 24px 28px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); margin-bottom: 24px; border: 1px solid #e2e8f0; }
+        .progress-bar-container { background: #e2e8f0; border-radius: 10px; height: 10px; width: 100%; margin-top: 12px; overflow: hidden; }
+        .progress-bar { background: linear-gradient(135deg, var(--success) 0%, #1e8449 100%); height: 100%; border-radius: 10px; transition: width 0.6s ease; }
+
+        /* Grid Layout */
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        @media (max-width: 768px) { .grid-layout { grid-template-columns: 1fr; } }
+
+        .card { background: #ffffff; padding: 28px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); margin-bottom: 24px; border: 1px solid #e2e8f0; transition: transform 0.2s; }
+        .card h3 { color: var(--secondary); margin-top: 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; font-size: 18px; display: flex; align-items: center; gap: 8px; font-weight: 700; }
+
+        /* Form Controls */
+        label { font-weight: 600; font-size: 13px; color: #475569; display: block; margin-top: 14px; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 11px 14px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: var(--bg-light); transition: all 0.2s; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.15); }
+
+        button.action-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; border: none; padding: 13px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: bold; margin-top: 20px; box-shadow: 0 4px 15px rgba(37, 117, 252, 0.3); transition: all 0.2s; }
+        button.action-btn:hover { opacity: 0.95; transform: translateY(-1px); }
+        button.action-btn:disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; box-shadow: none; transform: none; }
+
+        /* Tables & Badges */
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border: 1px solid #e2e8f0; padding: 11px 14px; text-align: left; font-size: 13px; }
+        th { background-color: var(--dark); color: white; font-weight: 600; }
+
+        .badge-paid { background: #d4edda; color: #155724; padding: 5px 12px; border-radius: 6px; font-weight: bold; display: inline-block; }
+        .badge-unpaid { background: #fef3c7; color: #92400e; padding: 5px 12px; border-radius: 6px; font-weight: bold; display: inline-block; border: 1px solid #fde68a; }
+
+        .receipt-btn { background: var(--success); color: white; padding: 7px 14px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: bold; display: inline-block; box-shadow: 0 2px 8px rgba(39, 174, 96, 0.2); transition: background 0.2s; }
+        .receipt-btn:hover { background: #1e8449; }
+        .receipt-btn-disabled { background: #e2e8f0; color: #94a3b8; padding: 7px 14px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: bold; display: inline-block; cursor: not-allowed; }
+
+        /* Profile Elements */
+        .profile-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); margin-bottom: 10px; box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+        .no-photo { width: 100px; height: 100px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; margin: 0 auto 10px auto; border: 2px dashed #cbd5e1; }
+
+        .edit-redirect-btn { background: linear-gradient(135deg, #8e44ad 0%, #732d91 100%); color: white; border: none; padding: 12px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; margin-top: 20px; text-decoration: none; display: block; text-align: center; box-shadow: 0 4px 12px rgba(142, 68, 173, 0.3); transition: all 0.2s; box-sizing: border-box; }
+        .edit-redirect-btn:hover { opacity: 0.95; transform: translateY(-1px); color: white; }
+        
+        .notice-badge { background: #fef3c7; color: #92400e; padding: 12px 16px; border-radius: 10px; font-size: 12px; margin-bottom: 18px; border: 1px solid #fde68a; line-height: 1.5; }
+        .view-field { padding: 11px 14px; background: var(--bg-light); border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; margin-top: 5px; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header Bar with Logout & Live Countdown Timer -->
+    <div class="header-bar">
+        <div>
+            <h2>🎓 Student Portal • KM Campus, Banwaripur</h2>
+            <small style="color: #64748b; font-size: 13px;">Welcome back, <b>{{ student['name'] }}</b> &bull; Batch: <span style="color: var(--dark); font-weight: 600;">{{ student['batch'] }}</span></small>
+        </div>
+        <div class="header-right">
+            <div class="timer-badge" id="timerBadge" title="Time remaining before auto-logout">
+                ⏳ Auto-logout in: <span id="countdownClock" style="font-family: monospace; font-weight: bold;">10:00</span>
+            </div>
+            <a href="/student-logout" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    <!-- REGISTRATION STATUS TRACKING BANNER -->
+    {% if student['status'] == 'Pending' %}
+        <div class="status-banner-pending">
+            <span style="font-size: 22px;">⏳</span>
+            <div>
+                <b>Account Status: Pending Approval</b><br>
+                Your registration is currently under review by the admin/teacher. Some features (like downloading fee receipts and official document approvals) are temporarily locked until your profile is fully verified.
+            </div>
+        </div>
+    {% else %}
+        <div class="status-banner-active">
+            <span style="font-size: 22px;">✅</span>
+            <div>
+                <b>Account Status: Active & Verified</b><br>
+                Your admission application has been approved by the administration. All student portal features are fully unlocked!
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Feedback Alerts -->
+    {% if success %}
+        <div class="alert alert-success">✓ {{ success }}</div>
+    {% endif %}
+    {% if error %}
+        <div class="alert alert-error">⚠️ {{ error }}</div>
+    {% endif %}
+
+    <!-- Profile Completion Progress Card -->
+    <div class="progress-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <b style="color: var(--dark); font-size: 15px;">📊 Profile Completion Status</b>
+            <span style="font-weight: bold; color: {% if completion_percentage == 100 %}var(--success){% else %}var(--warning){% endif %};">{{ completion_percentage }}% Completed</span>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" style="width: {{ completion_percentage }}%;"></div>
+        </div>
+        {% if completion_percentage < 100 %}
+            <small style="color: #64748b; margin-top: 10px; display: block;">💡 <b>Tip:</b> Fill in all optional details and upload your profile photo & document scans to reach 100% completion.</small>
+        {% endif %}
+    </div>
+
+    <!-- MAIN DASHBOARD GRID -->
+    <div class="grid-layout">
+
+        <!-- Left Column: Personal Information & Edit Profile Link -->
+        <div class="card">
+            <h3>👤 Personal Information</h3>
+
+            <div style="text-align: center; margin-bottom: 22px;">
+                {% if student['photo'] %}
+                    <img src="{{ url_for('static', filename='uploads/' + student['photo']) }}" class="profile-img">
+                {% else %}
+                    <div class="no-photo">No Photo</div>
+                {% endif %}
+                <div style="font-size: 12px; color: #64748b; margin-top: 6px;">Account Status: <b style="color: {% if student['status'] == 'Active' %}var(--success){% else %}var(--warning){% endif %};">{{ student['status'] }}</b></div>
+            </div>
+
+            <!-- View-Only Display Mode -->
+            <div>
+                <label>Full Name</label>
+                <div class="view-field" style="font-weight: 600;">{{ student['name'] }}</div>
+
+                <label>Father's Name</label>
+                <div class="view-field">{{ student['father_name'] or 'Not Provided' }}</div>
+
+                <label>Village &amp; Post Office</label>
+                <div class="view-field">{{ student['village'] or '' }}, PO: {{ student['post'] or '' }}</div>
+
+                <label>Primary Phone</label>
+                <div class="view-field">{{ student['phone'] }}</div>
+
+                <label>Identity Number</label>
+                <div class="view-field" style="font-family: monospace;">
+                    {% if student['aadhaar'] %}XXXX-XXXX-{{ student['aadhaar'][-4:] }}{% else %}Not Provided{% endif %}
+                </div>
+
+                <a href="/student-edit-profile" class="edit-redirect-btn">✏️ Edit Profile Details (Request Changes)</a>
+            </div>
+        </div>
+
+        <!-- Right Column: Document Uploads & Fee Ledger -->
+        <div>
+            <!-- Document Upload Card -->
+            <div class="card">
+                <h3>📁 Document Uploads</h3>
+                <form action="/student-upload-docs" method="POST" enctype="multipart/form-data">
+                    <label>Passport Photo <small style="color:#64748b;">(Max 515 KB)</small></label>
+                    <input type="file" name="photo" accept="image/*" {% if student['status'] == 'Pending' %}disabled{% endif %}>
+
+                    <label>Aadhaar Document Scan <small style="color:#64748b;">(Max 600 KB)</small></label>
+                    <input type="file" name="aadhaar_front" accept="image/*,.pdf" {% if student['status'] == 'Pending' %}disabled{% endif %}>
+
+                    <button type="submit" class="action-btn" style="background: linear-gradient(135deg, var(--success) 0%, #1e8449 100%); margin-top: 20px;" {% if student['status'] == 'Pending' %}disabled title="Account pending approval"{% endif %}>Upload Documents</button>
+                </form>
+                {% if student['status'] == 'Pending' %}
+                    <small style="color: #b45309; display: block; margin-top: 10px; text-align: center; font-weight: 500;">🔒 Document uploading is locked while your account is pending admin approval.</small>
+                {% endif %}
+            </div>
+
+            <!-- Fee Ledger Card -->
+            <div class="card">
+                <h3>💳 Fee Payment Ledger &amp; Receipts</h3>
+                <div class="notice-badge" style="margin-bottom: 18px; font-size: 11px; background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;">
+                    ℹ️ <b>Fee Ledger Notice:</b> Current and upcoming months are listed below. Future months display as <b>Unpaid (No Advance)</b> until payments are officially recorded by the administration.
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <tr>
+                            <th>Month / Period</th>
+                            <th>Payment Status</th>
+                            <th>Action / Receipt</th>
+                        </tr>
+                        {% if fee_history %}
+                            {% for f in fee_history %}
+                            <tr>
+                                <td><b>{{ f['month_year'] }}</b></td>
+                                <td>
+                                    {% if f['status'] == 'Paid' %}
+                                        <span class="badge-paid">Paid ✓</span>
+                                    {% else %}
+                                        <span class="badge-unpaid">Unpaid (No Advance) ✗</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if f['status'] == 'Paid' %}
+                                        {% if student['status'] == 'Active' %}
+                                            <a href="/download-receipt/{{ f['id'] }}" class="receipt-btn" target="_blank">📥 Download PDF</a>
+                                        {% else %}
+                                            <span class="receipt-btn-disabled" title="Available after approval">📥 Download PDF</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span style="color: #94a3b8; font-size: 12px; font-style: italic;">Pending Due</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3" style="text-align: center; color: #64748b; padding: 20px;">No fee records found yet.</td>
+                            </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- 10-Minute Inactivity Timer Script -->
+<script>
+    let totalSeconds = 600; // 10 minutes = 600 seconds
+    let countdownInterval;
+
+    function updateClockDisplay() {
+        let minutes = Math.floor(totalSeconds / 60);
+        let seconds = totalSeconds % 60;
+
+        let formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+        let formattedSeconds = seconds < 10 ? "0" + seconds : seconds;
+
+        document.getElementById('countdownClock').innerText = formattedMinutes + ":" + formattedSeconds;
+
+        let badge = document.getElementById('timerBadge');
+        if (totalSeconds <= 60) {
+            badge.style.background = "#fee2e2";
+            badge.style.color = "#b91c1c";
+            badge.style.borderColor = "#fca5a5";
+        } else {
+            badge.style.background = "#fef3c7";
+            badge.style.color = "#92400e";
+            badge.style.borderColor = "#fde68a";
+        }
+    }
+
+    function resetInactivityTimer() {
+        totalSeconds = 600; // Reset back to 10 minutes (10:00)
+        updateClockDisplay();
+    }
+
+    function startCountdown() {
+        clearInterval(countdownInterval);
+        countdownInterval = setInterval(() => {
+            totalSeconds--;
+            updateClockDisplay();
+
+            if (totalSeconds <= 0) {
+                clearInterval(countdownInterval);
+                alert("⚠️ Your student session has expired due to 10 minutes of inactivity. For security reasons, you are being logged out.");
+                window.location.href = "/student-logout";
+            }
+        }, 1000);
+    }
+
+    window.onload = function() {
+        updateClockDisplay();
+        startCountdown();
+    };
+
+    ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
+        window.addEventListener(event, resetInactivityTimer, true);
+    });
+</script>
+
+</body>
+</html>

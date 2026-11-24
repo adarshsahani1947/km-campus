@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Approvals (New &amp; Edit) — KM Campus{% endblock %}</title>
+
+    <!-- =====================================================================
+         COMMON CSS (Extract to static/css/km_portal.css for multi-page reuse)
+         ===================================================================== -->
+    <style id="km-common-css">
+        :root {
+            --km-bg: #f1f5f9;
+            --km-surface: #ffffff;
+            --km-ink: #0f172a;
+            --km-muted: #64748b;
+            --km-border: #e2e8f0;
+            --km-primary: #1d4ed8;
+            --km-primary-hover: #1e40af;
+            --km-primary-soft: #eff6ff;
+            --km-success: #15803d;
+            --km-success-hover: #166534;
+            --km-success-soft: #f0fdf4;
+            --km-danger: #b91c1c;
+            --km-danger-hover: #991b1b;
+            --km-danger-soft: #fef2f2;
+            --km-amber: #b45309;
+            --km-amber-soft: #fffbeb;
+            --km-radius: 10px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--km-bg);
+            color: var(--km-ink);
+            line-height: 1.45;
+            padding-bottom: 56px;
+        }
+
+        .km-topbar {
+            background: #0f172a;
+            color: #ffffff;
+            padding: 14px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .km-topbar h1 { font-size: 1.15rem; font-weight: 700; }
+        .km-topbar p { font-size: 0.82rem; color: #cbd5e1; margin-top: 2px; }
+        .km-topbar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .km-container {
+            max-width: 1120px;
+            margin: 22px auto;
+            padding: 0 16px;
+        }
+
+        .km-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 13px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+        .km-btn-sm { padding: 6px 11px; font-size: 0.8rem; }
+        .km-btn-dark { background: #1e293b; color: #f8fafc; border-color: #334155; }
+        .km-btn-dark:hover { background: #334155; }
+        .km-btn-primary { background: var(--km-primary); color: #ffffff; }
+        .km-btn-primary:hover { background: var(--km-primary-hover); }
+        .km-btn-success { background: var(--km-success); color: #ffffff; }
+        .km-btn-success:hover { background: var(--km-success-hover); }
+        .km-btn-danger { background: var(--km-danger); color: #ffffff; }
+        .km-btn-danger:hover { background: #991b1b; }
+        .km-btn-outline { background: #ffffff; color: var(--km-ink); border-color: var(--km-border); }
+        .km-btn-outline:hover { background: #f8fafc; }
+
+        .km-flash {
+            padding: 12px 16px;
+            border-radius: var(--km-radius);
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid;
+        }
+        .km-flash.success { background: var(--km-success-soft); color: var(--km-success); border-color: #bbf7d0; }
+        .km-flash.error { background: var(--km-danger-soft); color: var(--km-danger); border-color: #fecaca; }
+
+        .km-toolbar {
+            background: var(--km-surface);
+            border: 1px solid var(--km-border);
+            border-radius: var(--km-radius);
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .km-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+        .km-tab {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--km-border);
+            background: #f8fafc;
+            color: var(--km-ink);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .km-tab.active { background: var(--km-primary); color: #ffffff; border-color: var(--km-primary); }
+        .km-badge {
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(15, 23, 42, 0.1);
+        }
+        .km-tab.active .km-badge { background: rgba(255, 255, 255, 0.22); color: #ffffff; }
+
+        .km-search-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+        .km-search-input {
+            padding: 8px 12px;
+            border: 1px solid var(--km-border);
+            border-radius: 8px;
+            font-size: 0.88rem;
+            min-width: 240px;
+            background: #ffffff;
+            color: var(--km-ink);
+        }
+
+        .km-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .km-list-item {
+            background: var(--km-surface);
+            border: 1px solid var(--km-border);
+            border-radius: var(--km-radius);
+            overflow: hidden;
+        }
+        .km-list-row {
+            padding: 14px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+        .km-student-main {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 240px;
+            flex: 1 1 320px;
+        }
+        .km-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid var(--km-border);
+            background: #e2e8f0;
+            flex-shrink: 0;
+        }
+        .km-avatar-ph {
+            width: 46px;
+            height: 46px;
+            border-radius: 8px;
+            background: var(--km-primary-soft);
+            color: var(--km-primary);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .km-title { font-size: 0.98rem; font-weight: 700; color: var(--km-ink); }
+        .km-sub { font-size: 0.82rem; color: var(--km-muted); margin-top: 2px; }
+
+        .km-meta-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            flex: 1 1 260px;
+        }
+        .km-pill {
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #334155;
+        }
+        .km-pill-warn { background: var(--km-amber-soft); color: var(--km-amber); }
+        .km-pill-info { background: var(--km-primary-soft); color: var(--km-primary); }
+
+        .km-row-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+        .km-row-actions form { display: inline; }
+
+        /* Inline Review & Edit Drawer */
+        .km-review-drawer {
+            background: #f8fafc;
+            border-top: 1px solid var(--km-border);
+            padding: 16px;
+        }
+        .km-drawer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .km-drawer-head h3 { font-size: 0.95rem; font-weight: 700; }
+
+        .km-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 12px;
+        }
+        .km-field label {
+            display: block;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        .km-field input,
+        .km-field select {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 0.86rem;
+            background: #ffffff;
+            color: var(--km-ink);
+        }
+
+        .km-diff-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.84rem;
+            background: #ffffff;
+            margin-bottom: 12px;
+        }
+        .km-diff-table th,
+        .km-diff-table td {
+            border: 1px solid var(--km-border);
+            padding: 8px 10px;
+            text-align: left;
+        }
+        .km-diff-table th { background: #f1f5f9; color: #475569; }
+        .km-old { color: #64748b; text-decoration: line-through; }
+        .km-new { color: var(--km-primary); font-weight: 700; }
+
+        .km-drawer-footer {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--km-border);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .km-footer-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .km-footer-group form { display: inline; }
+
+        .km-empty {
+            background: var(--km-surface);
+            border: 1px dashed #cbd5e1;
+            border-radius: var(--km-radius);
+            padding: 36px 20px;
+            text-align: center;
+            color: var(--km-muted);
+        }
+        .km-empty h3 { color: var(--km-ink); font-size: 1rem; margin-bottom: 4px; }
+        .km-hidden { display: none !important; }
+    </style>
+    {% block base_styles %}{% endblock %}
+</head>
+<body>
+
+<!-- =====================================================================
+     BASE LAYOUT HEADER
+     ===================================================================== -->
+<header class="km-topbar">
+    <div>
+        <h1>Approvals Queue — New Approval &amp; Edit Requests</h1>
+        <p>Signed in as {{ teacher_name }} (@{{ teacher_username }}) • Click <strong>New Approval</strong> or search to view records</p>
+    </div>
+    <div class="km-topbar-actions">
+        <a href="{{ url_for('teacher_dashboard') }}" class="km-btn km-btn-dark">← Teacher Dashboard</a>
+        <a href="{{ url_for('teacher_register_or_edit') }}" class="km-btn km-btn-primary">+ Direct Register / Edit</a>
+    </div>
+</header>
+
+<main class="km-container">
+{% block content %}
+
+    {% if flash_msg %}
+    <div class="km-flash {{ flash_status or 'success' }}">{{ flash_msg }}</div>
+    {% endif %}
+
+    <!-- Tab Switcher & Search Box + Buttons -->
+    <div class="km-toolbar">
+        <div class="km-tabs">
+            <button type="button" class="km-tab" id="km-tab-new" data-tab="new"
+                    onclick="kmSelectApprovalTab('new', this)">
+                New Approval <span class="km-badge">{{ pending_students|length }}</span>
+            </button>
+            <button type="button" class="km-tab" id="km-tab-edit" data-tab="edit"
+                    onclick="kmSelectApprovalTab('edit', this)">
+                Edit Requests <span class="km-badge">{{ pending_edits|length }}</span>
+            </button>
+        </div>
+        <div class="km-search-group">
+            <input type="text" id="kmListFilter" class="km-search-input"
+                   placeholder="Search by name, father, class, batch, village..."
+                   oninput="kmOnSearchInput()"
+                   onkeydown="if (event.key === 'Enter') { event.preventDefault(); kmRunSearch(); }">
+            <button type="button" class="km-btn km-btn-primary" onclick="kmRunSearch()">Search</button>
+            <button type="button" class="km-btn km-btn-outline km-hidden" id="kmClearSearchBtn" onclick="kmClearSearch()">Clear</button>
+        </div>
+    </div>
+
+    <!-- Default Prompt on Initial Load / Reload -->
+    <div id="km-idle-prompt" class="km-empty">
+        <h3>Pending List Hidden by Default</h3>
+        <p>Click <strong>New Approval</strong> or enter a name and click <strong>Search</strong> to open the pending list.</p>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- LIST 1: NEW APPROVAL (HIDDEN BY DEFAULT UNTIL CLICKED/SEARCHED)   -->
+    <!-- ================================================================= -->
+    <section id="km-panel-new" class="km-hidden">
+        {% if pending_students %}
+        <div class="km-list">
+            {% for st in pending_students %}
+            <div class="km-list-item km-filterable"
+                 data-tab-group="new"
+                 data-search="{{ (st.name ~ ' ' ~ st.father_name ~ ' ' ~ st.username ~ ' ' ~ st.school_class ~ ' ' ~ st.batch ~ ' ' ~ st.village)|lower }}">
+
+                <!-- Main List Row -->
+                <div class="km-list-row">
+                    <div class="km-student-main">
+                        {% if st.photo %}
+                        <img class="km-avatar" src="{{ url_for('static', filename='uploads/' ~ st.photo) }}" alt="{{ st.name }}">
+                        {% else %}
+                        <div class="km-avatar-ph">{{ (st.name[:1] or 'S')|upper }}</div>
+                        {% endif %}
+                        <div>
+                            <div class="km-title">{{ st.name }}</div>
+                            <div class="km-sub">
+                                S/o {{ st.father_name or 'N/A' }} • @{{ st.username }} • Contact: {{ st.phone or 'Masked' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="km-meta-pills">
+                        <span class="km-pill km-pill-warn">Pending</span>
+                        <span class="km-pill">{{ st.school_class or 'Class N/A' }}</span>
+                        <span class="km-pill">{{ st.batch or 'Morning Batch' }}</span>
+                        {% if st.village %}
+                        <span class="km-pill">{{ st.village }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="km-row-actions">
+                        <button type="button" class="km-btn km-btn-sm km-btn-primary"
+                                onclick="kmTogglePanel('review-new-{{ st.id }}')">
+                            Review &amp; Approve
+                        </button>
+                        <form method="POST" action="{{ url_for('teacher_reject_student', student_id=st.id) }}"
+                              onsubmit="return confirm('Reject pending admission for {{ st.name }}?');">
+                            <button type="submit" class="km-btn km-btn-sm km-btn-danger">Reject</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Same-Page Review, Edit & Approve/Reject Menu -->
+                <div id="review-new-{{ st.id }}" class="km-review-drawer km-hidden">
+                    <div class="km-drawer-head">
+                        <h3>Review &amp; Edit Prefilled Details — {{ st.name }} (#{{ st.id }})</h3>
+                        <button type="button" class="km-btn km-btn-sm km-btn-outline"
+                                onclick="kmTogglePanel('review-new-{{ st.id }}')">Close</button>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('teacher_registrations') }}"
+                          enctype="multipart/form-data" id="edit-form-{{ st.id }}">
+                        <input type="hidden" name="action" value="save_pending_student">
+                        <input type="hidden" name="student_id" value="{{ st.id }}">
+                        <input type="hidden" name="return_tab" value="new">
+
+                        <div class="km-form-grid">
+                            <div class="km-field">
+                                <label>Student Name</label>
+                                <input type="text" name="name" value="{{ st.name }}" required>
+                            </div>
+                            <div class="km-field">
+                                <label>Father's Name</label>
+                                <input type="text" name="father_name" value="{{ st.father_name }}" required>
+                            </div>
+                            <div class="km-field">
+                                <label>Mother's Name</label>
+                                <input type="text" name="mother_name" value="{{ st.mother_name }}">
+                            </div>
+                            <div class="km-field">
+                                <label>Date of Birth</label>
+                                <input type="text" name="dob" value="{{ st.dob }}" placeholder="YYYY-MM-DD">
+                            </div>
+                            <div class="km-field">
+                                <label>Gender</label>
+                                <select name="gender">
+                                    <option value="Male" {% if st.gender == 'Male' %}selected{% endif %}>Male</option>
+                                    <option value="Female" {% if st.gender == 'Female' %}selected{% endif %}>Female</option>
+                                    <option value="Other" {% if st.gender == 'Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                            <div class="km-field">
+                                <label>Class</label>
+                                <input type="text" name="school_class" value="{{ st.school_class }}" required>
+                            </div>
+                            <div class="km-field">
+                                <label>Batch</label>
+                                <input type="text" name="batch" value="{{ st.batch or 'Morning Batch' }}" required>
+                            </div>
+                            <div class="km-field">
+                                <label>Village</label>
+                                <input type="text" name="village" value="{{ st.village }}" required>
+                            </div>
+                            <div class="km-field">
+                                <label>Post Office</label>
+                                <input type="text" name="post" value="{{ st.post }}">
+                            </div>
+                            <div class="km-field">
+                                <label>Block</label>
+                                <input type="text" name="block" value="{{ st.block }}" required>
+                            </div>
+                            <div class="km-field">
+                                <label>Subdivision</label>
+                                <input type="text" name="subdivision" value="{{ st.subdivision }}" required>
+                            </div>
+                            <div class="km-field">
+                                <label>District</label>
+                                <input type="text" name="district" value="{{ st.district }}" required>
+                            </div>
+                            <div class="km-field">
+                                <label>State</label>
+                                <input type="text" name="state" value="{{ st.state }}" required>
+                            </div>
+                            <div class="km-field">
+                                <label>Country</label>
+                                <input type="text" name="country" value="{{ st.country or 'India' }}" required>
+                            </div>
+                            <div class="km-field">
+                                <label>PIN Code</label>
+                                <input type="text" name="pincode" value="{{ st.pincode }}">
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="km-drawer-footer">
+                        <span class="km-sub">Click <strong>Save</strong> to keep edits as Pending for later, or click <strong>Approve</strong> / <strong>Reject</strong>.</span>
+                        <div class="km-footer-group">
+                            <button type="submit" form="edit-form-{{ st.id }}" class="km-btn km-btn-sm km-btn-primary">
+                                Save
+                            </button>
+
+                            <form method="POST" action="{{ url_for('teacher_approve_student', student_id=st.id) }}">
+                                <button type="submit" class="km-btn km-btn-sm km-btn-success">Approve</button>
+                            </form>
+
+                            <form method="POST" action="{{ url_for('teacher_reject_student', student_id=st.id) }}"
+                                  onsubmit="return confirm('Reject pending admission for {{ st.name }}?');">
+                                <button type="submit" class="km-btn km-btn-sm km-btn-danger">Reject</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="km-empty">
+            <h3>No Pending New Approvals</h3>
+            <p>All new student admission applications have been processed.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- LIST 2: PENDING PROFILE EDIT REQUESTS (HIDDEN BY DEFAULT)         -->
+    <!-- ================================================================= -->
+    <section id="km-panel-edit" class="km-hidden">
+        {% if pending_edits %}
+        <div class="km-list">
+            {% for req in pending_edits %}
+            <div class="km-list-item km-filterable"
+                 data-tab-group="edit"
+                 data-search="{{ (req.current_name ~ ' ' ~ req.name ~ ' ' ~ req.student_username ~ ' ' ~ req.school_class ~ ' ' ~ req.batch)|lower }}">
+
+                <div class="km-list-row">
+                    <div class="km-student-main">
+                        <div class="km-avatar-ph">{{ (req.current_name[:1] or 'E')|upper }}</div>
+                        <div>
+                            <div class="km-title">{{ req.current_name }}</div>
+                            <div class="km-sub">
+                                @{{ req.student_username }} • {{ req.school_class or 'N/A' }} • {{ req.batch or 'Batch' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="km-meta-pills">
+                        <span class="km-pill km-pill-info">Edit Request #{{ req.id }}</span>
+                        {% if req.name and req.name != req.current_name %}
+                        <span class="km-pill">Name → {{ req.name }}</span>
+                        {% endif %}
+                        {% if req.father_name and req.father_name != req.current_father_name %}
+                        <span class="km-pill">Father → {{ req.father_name }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="km-row-actions">
+                        <button type="button" class="km-btn km-btn-sm km-btn-primary"
+                                onclick="kmTogglePanel('review-edit-{{ req.id }}')">
+                            Review &amp; Approve
+                        </button>
+                        <form method="POST" action="{{ url_for('teacher_registrations') }}"
+                              onsubmit="return confirm('Reject edit request #{{ req.id }}?');">
+                            <input type="hidden" name="action" value="reject_edit_req">
+                            <input type="hidden" name="req_id" value="{{ req.id }}">
+                            <input type="hidden" name="return_tab" value="edit">
+                            <button type="submit" class="km-btn km-btn-sm km-btn-danger">Reject</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Same-Page Edit Comparison & Approve/Reject Menu -->
+                <div id="review-edit-{{ req.id }}" class="km-review-drawer km-hidden">
+                    <div class="km-drawer-head">
+                        <h3>Requested Changes — {{ req.current_name }} (Request #{{ req.id }})</h3>
+                        <button type="button" class="km-btn km-btn-sm km-btn-outline"
+                                onclick="kmTogglePanel('review-edit-{{ req.id }}')">Close</button>
+                    </div>
+
+                    <table class="km-diff-table">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Current Value</th>
+                                <th>Requested Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if req.name and req.name != req.current_name %}
+                            <tr>
+                                <td>Name</td>
+                                <td class="km-old">{{ req.current_name or '—' }}</td>
+                                <td class="km-new">{{ req.name }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if req.father_name and req.father_name != req.current_father_name %}
+                            <tr>
+                                <td>Father's Name</td>
+                                <td class="km-old">{{ req.current_father_name or '—' }}</td>
+                                <td class="km-new">{{ req.father_name }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if req.dob and req.dob != req.current_dob %}
+                            <tr>
+                                <td>Date of Birth</td>
+                                <td class="km-old">{{ req.current_dob or '—' }}</td>
+                                <td class="km-new">{{ req.dob }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if req.gender and req.gender != req.current_gender %}
+                            <tr>
+                                <td>Gender</td>
+                                <td class="km-old">{{ req.current_gender or '—' }}</td>
+                                <td class="km-new">{{ req.gender }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if req.aadhaar and req.aadhaar != req.current_aadhaar %}
+                            <tr>
+                                <td>ID Number</td>
+                                <td class="km-old">{{ req.current_aadhaar or '—' }}</td>
+                                <td class="km-new">{{ req.aadhaar }}</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+
+                    <div class="km-drawer-footer">
+                        <span class="km-sub">Approve or reject this profile edit request.</span>
+                        <div class="km-footer-group">
+                            <form method="POST" action="{{ url_for('teacher_registrations') }}">
+                                <input type="hidden" name="action" value="approve_edit_req">
+                                <input type="hidden" name="req_id" value="{{ req.id }}">
+                                <input type="hidden" name="return_tab" value="edit">
+                                <button type="submit" class="km-btn km-btn-sm km-btn-success">Approve</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('teacher_registrations') }}"
+                                  onsubmit="return confirm('Reject edit request #{{ req.id }}?');">
+                                <input type="hidden" name="action" value="reject_edit_req">
+                                <input type="hidden" name="req_id" value="{{ req.id }}">
+                                <input type="hidden" name="return_tab" value="edit">
+                                <button type="submit" class="km-btn km-btn-sm km-btn-danger">Reject</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="km-empty">
+            <h3>No Pending Edit Requests</h3>
+            <p>No student profile edit requests are waiting for review.</p>
+        </div>
+        {% endif %}
+    </section>
+
+{% endblock %}
+</main>
+
+<!-- =====================================================================
+     COMMON JAVASCRIPT (Extract to static/js/km_portal.js for multi-page reuse)
+     ===================================================================== -->
+<script id="km-common-js">
+    var kmActiveTab = null;
+
+    function kmRenderListVisibility() {
+        var input = document.getElementById("kmListFilter");
+        var clearBtn = document.getElementById("kmClearSearchBtn");
+        var query = (input ? input.value : "").trim().toLowerCase();
+        var hasQuery = Boolean(query);
+        var hasSelection = Boolean(kmActiveTab) || hasQuery;
+
+        if (clearBtn) {
+            clearBtn.classList.toggle("km-hidden", !hasQuery);
+        }
+
+        document.getElementById("km-idle-prompt").classList.toggle("km-hidden", hasSelection);
+
+        var showNew = (kmActiveTab === "new") || (hasQuery && !kmActiveTab);
+        var showEdit = (kmActiveTab === "edit") || (hasQuery && !kmActiveTab);
+
+        document.getElementById("km-panel-new").classList.toggle("km-hidden", !showNew);
+        document.getElementById("km-panel-edit").classList.toggle("km-hidden", !showEdit);
+
+        document.querySelectorAll(".km-filterable").forEach(function (item) {
+            var haystack = item.getAttribute("data-search") || "";
+            var matchesQuery = !hasQuery || haystack.includes(query);
+            item.classList.toggle("km-hidden", !matchesQuery);
+        });
+    }
+
+    function kmSelectApprovalTab(tabName, triggerBtn) {
+        kmActiveTab = tabName;
+        document.querySelectorAll(".km-tab").forEach(function (btn) {
+            btn.classList.toggle("active", btn === triggerBtn);
+        });
+        kmRenderListVisibility();
+    }
+
+    function kmOnSearchInput() {
+        kmRenderListVisibility();
+    }
+
+    function kmRunSearch() {
+        var input = document.getElementById("kmListFilter");
+        if (input && !input.value.trim()) {
+            input.focus();
+            if (!kmActiveTab) {
+                var defaultTab = document.getElementById("km-tab-new");
+                if (defaultTab) kmSelectApprovalTab("new", defaultTab);
+            }
+            return;
+        }
+        kmRenderListVisibility();
+    }
+
+    function kmClearSearch() {
+        var input = document.getElementById("kmListFilter");
+        if (input) {
+            input.value = "";
+            input.focus();
+        }
+        kmRenderListVisibility();
+    }
+
+    function kmTogglePanel(panelId) {
+        var target = document.getElementById(panelId);
+        if (!target) return;
+        var willOpen = target.classList.contains("km-hidden");
+        document.querySelectorAll(".km-review-drawer").forEach(function (drawer) {
+            drawer.classList.add("km-hidden");
+        });
+        if (willOpen) {
+            target.classList.remove("km-hidden");
+            target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var postReturnTab = "{{ return_tab or '' }}";
+        if (postReturnTab === "new" || postReturnTab === "edit") {
+            var btn = document.getElementById("km-tab-" + postReturnTab);
+            if (btn) kmSelectApprovalTab(postReturnTab, btn);
+        }
+    });
+</script>
+{% block page_scripts %}{% endblock %}
+</body>
+</html>

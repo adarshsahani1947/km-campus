@@ -1,0 +1,240 @@
+{% extends "common/base.html" %}
+{% block title %}Sign In - KM Campus, Banwaripur{% endblock %}
+
+{% block extra_css %}
+body {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3c72 50%, #2575fc 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.portal-shell {
+    width: 100%;
+    max-width: 980px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 22px;
+    align-items: start;
+}
+.info-card, .login-card {
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    animation: fadeInScale 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes fadeInScale {
+    from { opacity: 0; transform: translateY(18px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: 26px 24px;
+    text-align: center;
+    position: relative;
+}
+.header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #27ae60, #2575fc, #f39c12);
+}
+.header h1 { margin: 0; font-size: 23px; font-weight: 700; letter-spacing: 0.4px; }
+.header p { margin: 6px 0 0; font-size: 13px; opacity: 0.88; }
+
+.body { padding: 26px; }
+.hindi-block {
+    background: #f8fafc;
+    border-left: 4px solid #2563eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    color: #1e293b;
+    line-height: 1.65;
+    font-size: 14.5px;
+}
+.hindi-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #1e3a8a;
+    margin: 0 0 6px;
+}
+.exam-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 10px;
+}
+.exam-tag {
+    background: #dbeafe;
+    color: #1e40af;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+.photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+}
+.photo-box {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    background: #f1f5f9;
+    height: 112px;
+}
+.photo-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+label {
+    font-weight: 600;
+    font-size: 13px;
+    color: #334155;
+    display: block;
+    margin-top: 14px;
+    margin-bottom: 6px;
+}
+input, select {
+    width: 100%;
+    padding: 11px 14px;
+    box-sizing: border-box;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 14px;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+    color: #1e293b;
+}
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 117, 252, 0.15);
+}
+.btn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border: none;
+    padding: 13px;
+    width: 100%;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 22px;
+    box-shadow: 0 6px 20px rgba(37, 117, 252, 0.3);
+}
+.footer-links {
+    margin-top: 20px;
+    text-align: center;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 16px;
+}
+.reg-link { font-size: 13px; color: var(--primary); font-weight: 600; text-decoration: none; }
+.reg-link:hover { text-decoration: underline; }
+.alert { border-radius: 10px; font-size: 13px; margin-bottom: 16px; padding: 11px 14px; font-weight: 600; }
+.alert-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+.alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+{% endblock %}
+
+{% block content %}
+<div class="portal-shell">
+    <!-- Hindi Information & Campus Gallery Card -->
+    <div class="info-card">
+        <div class="header">
+            <h1>🏫 KM CAMPUS — बनवारीपुर</h1>
+            <p>प्रतियोगी परीक्षाओं की विश्वसनीय तैयारी का केंद्र</p>
+        </div>
+        <div class="body">
+            <div class="hindi-block">
+                <p class="hindi-title">केएम कैंपस (KM Campus), बनवारीपुर के बारे में</p>
+                <p style="margin:0;">
+                    <strong>KM Campus</strong> <strong>बनवारीपुर</strong> में स्थित एक समर्पित शिक्षण एवं मार्गदर्शन संस्थान है, जहाँ छात्र-छात्राएँ सभी प्रमुख प्रतियोगी परीक्षाओं की व्यवस्थित और गुणवत्तापूर्ण तैयारी कर सकते हैं। यहाँ नियमित अभ्यास, मार्गदर्शन और परीक्षा-उन्मुख रणनीति के साथ <strong>BSSC, BPSC, SSC, Railway, Bihar Police</strong> तथा अन्य प्रतियोगी परीक्षाओं की तैयारी कराई जाती है।
+                </p>
+                <div class="exam-tags">
+                    <span class="exam-tag">BSSC</span>
+                    <span class="exam-tag">BPSC</span>
+                    <span class="exam-tag">SSC</span>
+                    <span class="exam-tag">Railway</span>
+                    <span class="exam-tag">Bihar Police</span>
+                    <span class="exam-tag">अन्य प्रतियोगी परीक्षाएँ</span>
+                </div>
+            </div>
+
+            <div class="photo-gallery">
+                <div class="photo-box">
+                    <img src="/static/uploads/photos/km_campus_banwaripur_hero.png" alt="KM Campus Banwaripur" onerror="this.style.display='none'">
+                </div>
+                <div class="photo-box">
+                    <img src="/static/uploads/photos/km_campus_study_hall.png" alt="KM Campus Study Hall" onerror="this.style.display='none'">
+                </div>
+                <div class="photo-box">
+                    <img src="/static/uploads/photos/km_campus_competitive_exams.png" alt="Competitive Exam Preparation" onerror="this.style.display='none'">
+                </div>
+                <div class="photo-box">
+                    <img src="/static/uploads/photos/km_campus_faculty_mentorship.png" alt="Faculty Guidance" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role-Based Login Card (Independent Student / Teacher / Admin Sessions) -->
+    <div class="login-card">
+        <div class="header">
+            <h1>🎓 KM CAMPUS</h1>
+            <p>Banwaripur • Multi-Role Portal Access</p>
+        </div>
+        <div class="body">
+            {% if error %}<div class="alert alert-error">⚠️ {{ error }}</div>{% endif %}
+            {% if success %}<div class="alert alert-success">✓ {{ success }}</div>{% endif %}
+
+            <form id="loginForm" action="/student-login" method="POST">
+                <label for="roleSelect">Select Portal Role</label>
+                <select name="role" id="roleSelect" onchange="updateLoginFormAction()" required>
+                    <option value="student">Student Portal</option>
+                    <option value="teacher">Teacher Portal</option>
+                    <option value="admin">Administrator Portal</option>
+                </select>
+
+                <label for="loginUsername">Login ID (Username)</label>
+                <input id="loginUsername" type="text" name="username" placeholder="Enter your username" autocomplete="username" required>
+
+                <label for="loginPassword">Password</label>
+                <input id="loginPassword" type="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+
+                <button type="submit" class="btn">Sign In to Dashboard</button>
+            </form>
+
+            <div class="footer-links">
+                <a href="/register" class="reg-link">New Student? Register for Admission &rarr;</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateLoginFormAction() {
+        const role = document.getElementById('roleSelect').value;
+        const form = document.getElementById('loginForm');
+        if (role === 'admin') {
+            form.action = '/admin-login';
+        } else if (role === 'teacher') {
+            form.action = '/teacher-login';
+        } else {
+            form.action = '/student-login';
+        }
+    }
+</script>
+{% endblock %}

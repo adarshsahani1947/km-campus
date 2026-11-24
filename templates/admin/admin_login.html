@@ -1,0 +1,103 @@
+{% extends "common/base.html" %}
+
+{% block title %}Admin Portal Login - KM Campus, Banwaripur{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { 
+        background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%); 
+        min-height: 100vh; display: flex; align-items: center; justify-content: center; 
+        padding: 20px;
+    }
+    .login-card { 
+        background: white; width: 100%; max-width: 440px; 
+        padding: 35px; border-radius: 16px; 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.25); box-sizing: border-box; 
+        animation: slideUp 0.4s ease-out;
+    }
+    @keyframes slideUp {
+        from { transform: translateY(15px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    .logo-area { text-align: center; margin-bottom: 22px; }
+    .logo-area h2 { margin: 0; color: var(--dark); font-size: 22px; font-weight: 800; }
+    .logo-area p { margin: 6px 0 0; font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+
+    .security-badge { 
+        background: #fef3c7; color: #92400e; border: 1px solid #fde68a; 
+        padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; 
+        text-align: center; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+
+    label { font-weight: 600; font-size: 13px; color: #334155; display: block; margin-top: 14px; margin-bottom: 5px; }
+    
+    .input-group { position: relative; }
+    input { 
+        width: 100%; padding: 11px 12px; box-sizing: border-box; 
+        border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #f9fbfd; 
+        transition: all 0.25s ease;
+    }
+    input:focus { outline: none; border-color: var(--secondary); background: #fff; box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.15); }
+    
+    .toggle-password { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 14px; color: #64748b; padding: 0; }
+
+    button.action-btn { 
+        background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%); 
+        color: white; border: none; padding: 13px; width: 100%; 
+        border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; 
+        margin-top: 22px; box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3); transition: opacity 0.2s;
+    }
+    button.action-btn:hover { opacity: 0.95; }
+
+    .back { display: block; text-align: center; margin-top: 20px; font-size: 13px; color: #64748b; text-decoration: none; font-weight: 600; border-top: 1px solid #eee; padding-top: 15px; }
+    .back:hover { color: var(--primary); text-decoration: underline; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-card">
+    <div class="logo-area">
+        <h2>🔐 Admin Control Portal</h2>
+        <p>KM Campus, Banwaripur • Staff Login</p>
+    </div>
+
+    <div class="security-badge">
+        🔒 Authorized Personnel Only • Encrypted Session
+    </div>
+
+    {% if error %}
+        <div class="alert alert-error">⚠️ {{ error }}</div>
+    {% endif %}
+
+    <form action="/admin-login" method="POST" onsubmit="return handleFormSubmit()">
+        <label>Admin Username *</label>
+        <input type="text" id="adminUser" name="username" placeholder="Enter admin username" required autocomplete="username">
+
+        <label>Admin Password *</label>
+        <div class="input-group">
+            <input type="password" id="adminPass" name="password" placeholder="Enter admin password" required autocomplete="current-password">
+            <button type="button" class="toggle-password" onclick="toggleVisibility('adminPass')" title="Show/Hide">👁️</button>
+        </div>
+
+        <button type="submit" id="submitBtn" class="action-btn">Secure Admin Login</button>
+    </form>
+    
+    <a href="/" class="back">← Back to Student Portal</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleVisibility(fieldId) {
+        const field = document.getElementById(fieldId);
+        field.type = field.type === 'password' ? 'text' : 'password';
+    }
+
+    function handleFormSubmit() {
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = 'Authenticating...';
+        btn.style.opacity = '0.8';
+        return true;
+    }
+</script>
+{% endblock %}
